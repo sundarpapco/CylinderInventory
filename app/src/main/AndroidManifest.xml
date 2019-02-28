@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.papco.sundar.cylinderinventory">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".screens.mainscreen.MainActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".screens.cylinders.CylindersActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.destinations.clients.ClientsActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.destinations.refills.RefillsActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.destinations.repairs.RepairStationsActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.inward.FsiActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.inward.EcrActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.inward.RepInActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.outward.refill.SelectRefillStationActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.outward.refill.RefillOperationActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.outward.repair.RepOutOperationActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.outward.repair.SelectRepairStationActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.allotment.AllotmentActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.allotment.SelectClientActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.allotment.CreateAllotmentActivity"
+            android:windowSoftInputMode="stateVisible"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.allotment.FillCylindersActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".screens.operations.outward.Invoice.InvoiceOperationActivity"
+            android:screenOrientation="portrait"/>
+
+        <service android:name=".logic.TransactionRunnerService"
+            android:exported="false"/>
+
+    </application>
+
+</manifest>

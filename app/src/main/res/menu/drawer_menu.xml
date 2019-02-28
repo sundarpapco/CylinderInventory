@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:id="@+id/mnu_group_places"
+        android:checkableBehavior="none">
+
+        <item android:id="@+id/mnu_drawer_cylinders"
+            android:title="Cylinders"/>
+
+        <item android:id="@+id/mnu_drawer_clients"
+            android:title="Clients"/>
+
+        <item android:id="@+id/mnu_drawer_refilling_stations"
+            android:title="Refilling Stations"/>
+
+        <item android:id="@+id/mnu_drawer_repair_stations"
+            android:title="Repair Stations"/>
+
+    </group>
+
+    <group android:id="@+id/mnu_group_operations"
+        android:checkableBehavior="none">
+
+        <item android:id="@+id/mnu_drawer_allotment"
+            android:title="Allotments"/>
+
+        <item android:id="@+id/mnu_drawer_fci"
+            android:title="Full cylinder inward"/>
+
+        <item android:id="@+id/mnu_drawer_ecr"
+            android:title="Empty cylinder receipt"/>
+
+        <item android:id="@+id/mnu_drawer_repin"
+            android:title="Repaired cylinder inward"/>
+
+        <item android:id="@+id/mnu_drawer_refill"
+            android:title="Send for refilling"/>
+
+        <item android:id="@+id/mnu_drawer_repout"
+            android:title="Send for repair"/>
+    </group>
+
+</menu>

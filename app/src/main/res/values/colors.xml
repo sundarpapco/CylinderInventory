@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#BEBEBE</color>
+    <color name="colorAccent">#8E0DF1</color>
+
+    <color name="borderGrey">#707070</color>
+    <color name="lightGreen">#9FFF20</color>
+    <color name="darkGreen">#5E8529</color>
+    <color name="progressOverlay">#74000000</color>
+
+    <color name="Orange">#FF9B20</color>
+</resources>

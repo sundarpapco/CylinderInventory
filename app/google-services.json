@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "934446364493",
+    "firebase_url": "https://cylinderinventory-b7c6b.firebaseio.com",
+    "project_id": "cylinderinventory-b7c6b",
+    "storage_bucket": "cylinderinventory-b7c6b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:934446364493:android:7020e7eea6e7fddc",
+        "android_client_info": {
+          "package_name": "com.papco.sundar.cylinderinventory"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "934446364493-g5f7t74dl666qnf9nfal0ofcq2refm0l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.papco.sundar.cylinderinventory",
+            "certificate_hash": "e545916c68041d03c75b29502367da3f88536a3a"
+          }
+        },
+        {
+          "client_id": "934446364493-mreab7qadne3l7887f78mb5h6ugtangq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQ59SZ6-dnXF2mTE5EDB2TCUihtvWAM5k"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "934446364493-mreab7qadne3l7887f78mb5h6ugtangq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

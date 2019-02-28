@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/manage_cyl_search_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:hint="Cylinder No"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/mng__cyl_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:inputType="number"
+            android:drawableEnd="@drawable/ic_search"
+            android:maxLines="1"
+            android:imeOptions="actionSearch"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <View
+        android:id="@+id/mng_cyl_click_sense"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/manage_cyl_search_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/manage_cyl_search_layout" />
+
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/mng_cyl_details"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/manage_cyl_search_layout"
+        tools:layout_editor_absoluteX="16dp">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/rounded_corner"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/mng_cyl_no_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Cylinder number:"
+                android:textColor="@color/borderGrey"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/mng_cyl_no"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="3896"
+                android:textColor="#2CAFB8"
+                android:textSize="20sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/mng_cyl_no_text"
+                app:layout_constraintStart_toEndOf="@+id/mng_cyl_no_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_purchase_date_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="37dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Purchase date:"
+                android:textColor="@color/borderGrey"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_no_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_purchase_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="12/02/2017"
+                android:textColor="#02BE34"
+                android:textSize="18sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/mng_cyl_purchase_date_text"
+                app:layout_constraintStart_toEndOf="@+id/mng_cyl_purchase_date_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_supplier_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Supplier:"
+                android:textColor="@color/borderGrey"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_purchase_date_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_supplier"
+                android:layout_width="274dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="XYZ Cylinders mfrs Ltd"
+                android:textColor="#E89831"
+                android:textSize="18sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/mng_cyl_supplier_text"
+                app:layout_constraintStart_toEndOf="@+id/mng_cyl_supplier_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_remarks_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Remarks:"
+                android:textColor="@color/borderGrey"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_supplier_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_remarks"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-condensed"
+                android:text="287"
+                android:textColor="#FF0000"
+                android:textSize="18sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/mng_cyl_remarks_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/mng_cyl_remarks_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_refills_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="No.Of.Refills:"
+                android:textColor="@color/borderGrey"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_remarks_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_refills"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="287"
+                android:textColor="#150EEA"
+                android:textSize="18sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/mng_cyl_refills_text"
+                app:layout_constraintStart_toEndOf="@+id/mng_cyl_refills_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_repairs_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="No.Of.Repairs:"
+                android:textColor="@color/borderGrey"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_refills_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_repairs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="287"
+                android:textColor="#DC19B5"
+                android:textSize="18sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/mng_cyl_repairs_text"
+                app:layout_constraintStart_toEndOf="@+id/mng_cyl_repairs_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_location_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Current location:"
+                android:textColor="@color/borderGrey"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_repairs_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_location"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Sri vidhya Hospitals"
+                android:textColor="#FF0000"
+                android:textSize="18sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/mng_cyl_location_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/mng_cyl_location_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_status_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="15dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Current Status:"
+                android:textColor="@color/borderGrey"
+                android:textSize="18sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_location_text" />
+
+            <TextView
+                android:id="@+id/mng_cyl_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="ACTIVE"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/mng_cyl_status_text"
+                app:layout_constraintStart_toEndOf="@+id/mng_cyl_status_text" />
+
+            <Button
+                android:id="@+id/mng_cyl_btn_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="@color/colorAccent"
+                android:text="DELETE"
+                android:textColor="@android:color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_status_text" />
+
+            <Button
+                android:id="@+id/mng_cyl_btn_mark_repair"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:layout_marginBottom="8dp"
+                android:backgroundTint="@color/colorAccent"
+                android:text="MARK AS REPAIR"
+                android:textColor="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/mng_cyl_btn_delete"
+                app:layout_constraintTop_toTopOf="@+id/mng_cyl_btn_delete" />
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+    <ProgressBar
+        android:id="@+id/mng_cyl_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/manage_cyl_search_layout" />
+
+</android.support.constraint.ConstraintLayout>
