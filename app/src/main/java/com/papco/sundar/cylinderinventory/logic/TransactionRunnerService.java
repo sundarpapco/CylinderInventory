@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.api.LogDescriptor;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.R;
@@ -24,11 +25,17 @@ import java.lang.ref.WeakReference;
 
 public class TransactionRunnerService extends Service {
 
-    public static Intent getStartingIntent(Context context, String successMessage, String failureMessage){
+    public static Intent getStartingIntent(Context context,
+                                           String successMessage,
+                                           String progressMessage,
+                                           String failureMessage,
+                                           int requestCode){
 
         Bundle bundle=new Bundle();
         bundle.putString(KEY_SUCCESS_MESSAGE,successMessage);
         bundle.putString(KEY_FAILURE_MESSAGE,failureMessage);
+        bundle.putString(KEY_PROGRESS_MESSAGE,progressMessage);
+        bundle.putInt(KEY_REQUEST_CODE,requestCode);
         Intent intent=new Intent(context,TransactionRunnerService.class);
         intent.setAction(ACTION_START_SERVICE);
         intent.putExtras(bundle);
@@ -36,9 +43,19 @@ public class TransactionRunnerService extends Service {
 
     }
 
+    public static Intent getStoppingIntent(Context context){
+
+        Intent intent=new Intent(context,TransactionRunnerService.class);
+        intent.setAction(ACTION_STOP_SERVICE);
+        return intent;
+    }
+
     private static final String ACTION_START_SERVICE = "com.papco.sundar.cylinderinventory.starttransactionservice";
+    private static final String ACTION_STOP_SERVICE = "com.papco.sundar.cylinderinventory.stoptransactionservice";
     private static final String KEY_SUCCESS_MESSAGE="success_message";
     private static final String KEY_FAILURE_MESSAGE="failure_message";
+    private static final String KEY_PROGRESS_MESSAGE="progress_message";
+    private static final String KEY_REQUEST_CODE="request_code";
 
     //-------------------------- *** ----------------------------------
 
@@ -51,7 +68,9 @@ public class TransactionRunnerService extends Service {
     private TransactionListener callback = null;
     private String successMessage;
     private String failureMessage;
+    private String progressMessage;
     private TransactionBinder binder;
+    private int requestCode;
 
 
     @Override
@@ -65,6 +84,11 @@ public class TransactionRunnerService extends Service {
             } else {
                 initializeService(intent);
             }
+        }
+
+        if(intent.getAction().equals(ACTION_STOP_SERVICE)){
+            stopServiceSuccess();
+            return START_STICKY;
         }
 
         return START_STICKY;
@@ -86,6 +110,8 @@ public class TransactionRunnerService extends Service {
 
         successMessage=intent.getExtras().getString(KEY_SUCCESS_MESSAGE,"Transaction success");
         failureMessage=intent.getExtras().getString(KEY_FAILURE_MESSAGE,"Transacion failed. Check intener conection");
+        progressMessage=intent.getExtras().getString(KEY_PROGRESS_MESSAGE,"Running Transaction");
+        requestCode=intent.getExtras().getInt(KEY_REQUEST_CODE,-1);
         showNotification(); //This will make the service foreground
     }
 
@@ -93,7 +119,7 @@ public class TransactionRunnerService extends Service {
 
         builder = new NotificationCompat.Builder(this, MainActivity.NOTIFICATION_CHANNEL_ID);
         builder.setSmallIcon(R.drawable.ic_launcher_background);
-        builder.setContentTitle("Running transaction...");
+        builder.setContentTitle(progressMessage);
         builder.setPriority(NotificationCompat.PRIORITY_LOW);
         startForeground(NOTIFICATION_ID, builder.build());
 
@@ -106,8 +132,7 @@ public class TransactionRunnerService extends Service {
         else
             this.transaction=transaction;
 
-
-
+        Log.d("SUNDAR", "starting transaction work ");
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.runTransaction(transaction).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -116,7 +141,7 @@ public class TransactionRunnerService extends Service {
                 if (task.isSuccessful()) {
 
                     if (callback!=null)
-                        callback.onTransactionComplete(task);
+                        callback.onTransactionComplete(task,requestCode);
                     else
                         Msg.show(TransactionRunnerService.this,successMessage);
 
@@ -125,7 +150,7 @@ public class TransactionRunnerService extends Service {
                 } else {
 
                     if (callback!=null) {
-                        callback.onTransactionComplete(task);
+                        callback.onTransactionComplete(task,requestCode);
                         stopServiceSuccess();
                     } else {
                         Msg.show(TransactionRunnerService.this, failureMessage);
@@ -173,11 +198,15 @@ public class TransactionRunnerService extends Service {
         return isRunning;
     }
 
+    public int getRequestCode(){
+        return requestCode;
+    }
+
     //---------------- Nested declarations below
 
     public interface TransactionListener {
 
-        void onTransactionComplete(Task<Void> task);
+        void onTransactionComplete(Task<Void> task,int requestCode);
     }
 
     public class TransactionBinder extends Binder {

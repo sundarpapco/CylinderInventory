@@ -20,11 +20,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -35,7 +33,7 @@ import com.google.firebase.firestore.MetadataChanges;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
 import com.papco.sundar.cylinderinventory.common.Msg;
-import com.papco.sundar.cylinderinventory.logic.AddCylindersTransaction;
+import com.papco.sundar.cylinderinventory.logic.Transactions.AddCylindersTransaction;
 import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
 
 public class AddCylinderFragment extends Fragment implements TransactionRunnerService.TransactionListener {
@@ -68,6 +66,12 @@ public class AddCylinderFragment extends Fragment implements TransactionRunnerSe
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
         getLastCylinderNumber();
     }
 
@@ -137,6 +141,7 @@ public class AddCylinderFragment extends Fragment implements TransactionRunnerSe
 
     private void getLastCylinderNumber(){
 
+        Log.d("SUNDAR", "getLastCylinderNumber: ");
         listener=db.document(DbPaths.COUNT_CYLINDERS_TOTAL).addSnapshotListener(
                 MetadataChanges.INCLUDE,new EventListener<DocumentSnapshot>() {
             @Override
@@ -203,13 +208,12 @@ public class AddCylinderFragment extends Fragment implements TransactionRunnerSe
 
         //starting the service
         Intent intent=TransactionRunnerService.getStartingIntent(
-                getActivity(),successMsg,failMsg);
+                getActivity(),successMsg,"Running transaction",failMsg,1);
         getActivity().startService(intent);
 
         //binding to the service
         Intent bindIntent = new Intent(getActivity(), TransactionRunnerService.class);
-        if (connection == null)
-            connection = new TransactionServiceConnection();
+        connection = new TransactionServiceConnection();
         getActivity().bindService(bindIntent, connection, Context.BIND_AUTO_CREATE);
 
         //on Successfull binding, onServiceBinded will be called where we allot work to service
@@ -262,7 +266,7 @@ public class AddCylinderFragment extends Fragment implements TransactionRunnerSe
     }
 
     @Override
-    public void onTransactionComplete(Task<Void> task) {
+    public void onTransactionComplete(Task<Void> task,int requestCode) {
 
         hideProgressBar();
 
@@ -290,12 +294,16 @@ public class AddCylinderFragment extends Fragment implements TransactionRunnerSe
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onStop() {
+        super.onStop();
+        Log.d("SUNDAR", "stopping addcylinder fragment ");
+        hideProgressBar();
         listener.remove();
+        listener=null;
         if(transactionService!=null)
             transactionService.clearCallback();
     }
+
 
     class TransactionServiceConnection implements ServiceConnection {
 

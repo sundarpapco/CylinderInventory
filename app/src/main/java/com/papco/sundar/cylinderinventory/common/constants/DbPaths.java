@@ -7,6 +7,7 @@ public class DbPaths {
     //collections
     public static final String COLLECTION_CYLINDERS="cylinders";
     public static final String COLLECTION_DESTINATIONS="destinations";
+    public static final String COLLECTION_GRAVEYARD="graveyard";
 
 
     //Cylinder aggregation

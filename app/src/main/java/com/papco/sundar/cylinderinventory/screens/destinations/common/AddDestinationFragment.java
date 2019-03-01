@@ -19,7 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.data.Destination;
-import com.papco.sundar.cylinderinventory.logic.AddDestinationTransaction;
+import com.papco.sundar.cylinderinventory.logic.Transactions.AddDestinationTransaction;
 
 public class AddDestinationFragment extends DialogFragment {
 

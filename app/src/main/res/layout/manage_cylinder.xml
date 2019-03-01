@@ -49,7 +49,8 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/manage_cyl_search_layout"
-        tools:layout_editor_absoluteX="16dp">
+        app:layout_constraintVertical_bias="1.0"
+        tools:layout_editor_absoluteX="0dp">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
@@ -291,6 +292,15 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/mng_cyl_btn_delete"
                 app:layout_constraintTop_toTopOf="@+id/mng_cyl_btn_delete" />
+
+            <ProgressBar
+                android:id="@+id/small_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="@+id/mng_cyl_btn_mark_repair"
+                app:layout_constraintEnd_toStartOf="@+id/mng_cyl_btn_mark_repair" />
 
         </android.support.constraint.ConstraintLayout>
 

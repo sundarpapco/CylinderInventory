@@ -1,4 +1,4 @@
-package com.papco.sundar.cylinderinventory.logic;
+package com.papco.sundar.cylinderinventory.logic.Transactions;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -38,8 +38,6 @@ public class AddCylindersTransaction implements Transaction.Function<Void> {
     @Nullable
     @Override
     public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-
-        Log.d("SUNDAR", "Adding cylinders ");
 
         int lastNumber;
         int filledCount;
