@@ -3,6 +3,7 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
@@ -19,16 +20,7 @@
         android:elevation="6dp"
         app:titleTextColor="@color/borderGrey" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
 
 
         <android.support.design.widget.TextInputLayout
@@ -39,7 +31,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
-            android:hint="Client">
+            android:hint="Client"
+            app:layout_constraintTop_toBottomOf="@id/toolbar">
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/create_allot_client_name"
@@ -59,7 +52,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
-            android:hint="No.Of.Cylinders">
+            android:hint="No.Of.Cylinders"
+            app:layout_constraintTop_toBottomOf="@id/create_allot_client_layout">
 
             <android.support.design.widget.TextInputEditText
                 android:id="@+id/create_allot_cyl_count"
@@ -76,12 +70,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="16dp"
             android:backgroundTint="@color/colorAccent"
             android:text="SAVE"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            app:layout_constraintTop_toBottomOf="@id/create_allot_cyl_count_layout"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-    </LinearLayout>
+    <ProgressBar
+        android:id="@+id/create_allot_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/create_allot_btnSave"
+        app:layout_constraintEnd_toStartOf="@+id/create_allot_btnSave" />
+
 
 </android.support.constraint.ConstraintLayout>

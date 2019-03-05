@@ -8,12 +8,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Transaction;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
 import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
 import com.papco.sundar.cylinderinventory.data.Aggregation;
 import com.papco.sundar.cylinderinventory.data.Cylinder;
 import com.papco.sundar.cylinderinventory.data.Destination;
 
-public class MarkDamageTransaction implements Transaction.Function<Void> {
+public class MarkDamageTransaction extends BaseTransaction {
 
     private int cylinderNumber;
 

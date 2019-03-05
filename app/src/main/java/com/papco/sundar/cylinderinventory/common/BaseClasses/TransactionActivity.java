@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.Transaction;
@@ -14,7 +14,7 @@ import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
 
 import java.util.List;
 
-public class TransactionFragment extends Fragment implements TransactionRunnable {
+public class TransactionActivity extends AppCompatActivity implements TransactionRunnable{
 
     private boolean hasPendingWork=false;
     private TransactionRunnerService transactionService;
@@ -51,36 +51,35 @@ public class TransactionFragment extends Fragment implements TransactionRunnable
     }
 
     @Override
-    public void startTransaction(String successMsg, String progressMsg, String failureMsg, int requestCode) {
+    public final void startTransaction(String successMsg, String progressMsg, String failureMsg, int requestCode) {
 
         if(TransactionRunnerService.isRunning()){
-            Msg.show(requireContext(),"Already a transaction is running. Please try a bit later");
+            Msg.show(this,"Already a transaction is running. Please try a bit later");
             return;
         }
 
         Intent startIntent = TransactionRunnerService.getStartingIntent(
-                requireContext(), successMsg,"Running Transaction", failureMsg,requestCode);
+                this, successMsg,"Running Transaction", failureMsg,requestCode);
 
-        getActivity().startService(startIntent);
+        this.startService(startIntent);
 
         bindToService();
 
     }
 
     @Override
-    public void stopTransaction() {
-        Intent intent=TransactionRunnerService.getStoppingIntent(requireContext());
+    public final void stopTransaction() {
+        Intent intent=TransactionRunnerService.getStoppingIntent(this);
         unBindFromService();
-        getActivity().startService(intent);
+        startService(intent);
     }
 
     @Override
-    public void onServiceBinded(TransactionRunnerService service) {
+    public final void onServiceBinded(TransactionRunnerService service) {
 
         service.setCallback(this);
         if(hasPendingWork)
             return;
-
 
         BaseTransaction transaction=getTransactionToRun(service.getRequestCode());
 
@@ -99,25 +98,25 @@ public class TransactionFragment extends Fragment implements TransactionRunnable
     }
 
     @Override
-    public void bindToService() {
+    public final void bindToService() {
 
-        Intent bindIntent = new Intent(requireContext(), TransactionRunnerService.class);
+        Intent bindIntent = new Intent(this, TransactionRunnerService.class);
 
         if(connection==null)
             connection = new TransactionServiceConnection();
 
-        getActivity().bindService(bindIntent, connection, Context.BIND_AUTO_CREATE);
+        bindService(bindIntent, connection, Context.BIND_AUTO_CREATE);
 
     }
 
     @Override
-    public void unBindFromService() {
+    public final void unBindFromService() {
 
         if(transactionService!=null)
             transactionService.clearCallback();
 
         if(connection!=null)
-            getActivity().unbindService(connection);
+            unbindService(connection);
 
         transactionService=null;
         connection=null;
@@ -162,4 +161,6 @@ public class TransactionFragment extends Fragment implements TransactionRunnable
 
         }
     }
+
+
 }

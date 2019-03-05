@@ -1,13 +1,11 @@
 package com.papco.sundar.cylinderinventory.screens.operations.common;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,25 +15,29 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.ListenerRegistration;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.TransactionActivity;
 import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OperationActivity extends AppCompatActivity implements RecyclerListener<Integer> {
+public class OperationActivity extends TransactionActivity implements RecyclerListener<Integer> {
 
     private RecyclerView recyclerView;
     private OperationAdapter adapter;
-    private FrameLayout progressBar;
     private TextView cylinderCount;
     private TextInputLayout destinationLayout;
     private TextInputEditText destinationField;
-    protected FloatingActionButton fab;
-    protected Button btnSave;
+    private ProgressBar progressBar;
+    private FloatingActionButton fab;
+    private Button btnSave;
+
 
 
     @Override
@@ -62,10 +64,10 @@ public class OperationActivity extends AppCompatActivity implements RecyclerList
     private void linkViews() {
 
         recyclerView=findViewById(R.id.operation_inward_recycler);
-        progressBar=findViewById(R.id.operation_inward_progressbar);
         cylinderCount=findViewById(R.id.operation_inward_cyl_count);
         destinationLayout=findViewById(R.id.operation_destination_layout);
         destinationField=findViewById(R.id.operation_destination);
+        progressBar=findViewById(R.id.operation_progress_bar);
     }
 
     private void initViews() {
@@ -78,7 +80,6 @@ public class OperationActivity extends AppCompatActivity implements RecyclerList
         recyclerView.setAdapter(adapter);
 
 
-        progressBar.setVisibility(View.GONE);
         cylinderCount.setText("0");
 
         //fab
@@ -130,6 +131,10 @@ public class OperationActivity extends AppCompatActivity implements RecyclerList
 
     }
 
+    protected List<Integer> getCylinders(){
+        return adapter.getData();
+    }
+
     protected String getActivityTitle(){
         return "Operation Inward";
     }
@@ -161,14 +166,6 @@ public class OperationActivity extends AppCompatActivity implements RecyclerList
             adapter.updateNumber(number,position);
     }
 
-    protected void showProgress(){
-        progressBar.setVisibility(View.VISIBLE);
-    }
-
-    protected void hideProgress(){
-        progressBar.setVisibility(View.GONE);
-    }
-
     protected void hideDestinationLayout(){
         destinationLayout.setVisibility(View.GONE);
     }
@@ -185,6 +182,24 @@ public class OperationActivity extends AppCompatActivity implements RecyclerList
 
     }
 
+
+    @Override
+    public void showTransactionProgressBar() {
+
+        progressBar.setVisibility(View.VISIBLE);
+        recyclerView.setEnabled(false);
+        fab.hide();
+        btnSave.setEnabled(false);
+
+    }
+
+    @Override
+    public void hideTransactionProgressBar() {
+        progressBar.setVisibility(View.INVISIBLE);
+        recyclerView.setEnabled(true);
+        fab.show();
+        btnSave.setEnabled(true);
+    }
 
     @Override
     public void onRecyclerItemClicked(Integer item,int position) {

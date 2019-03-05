@@ -10,49 +10,59 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.TransactionDialogFragment;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.data.Destination;
 import com.papco.sundar.cylinderinventory.logic.Transactions.AddDestinationTransaction;
 
-public class AddDestinationFragment extends DialogFragment {
+public class AddDestinationFragment extends TransactionDialogFragment {
 
-    public static Bundle getStartingArguments(boolean isEditing, Destination destination){
+    public static Bundle getStartingArguments(boolean isEditing, Destination destination) {
 
-        Bundle arguments=new Bundle();
-        arguments.putBoolean(KEY_MODE,isEditing);
-        if(destination!=null){
-            arguments.putInt("destId",destination.getId());
-            arguments.putString("destName",destination.getName());
-            arguments.putInt("destType",destination.getDestType());
-            arguments.putInt("destCylCount",destination.getCylinderCount());
+        Bundle arguments = new Bundle();
+        arguments.putBoolean(KEY_MODE, isEditing);
+        if (destination != null) {
+            arguments.putInt("destId", destination.getId());
+            arguments.putString("destName", destination.getName());
+            arguments.putInt("destType", destination.getDestType());
+            arguments.putInt("destCylCount", destination.getCylinderCount());
         }
         return arguments;
 
     }
 
-    private static final String KEY_MODE="isEditing";
+    private static final String KEY_MODE = "isEditing";
 
-    TextView heading;
-    EditText destinationName;
-    Button btnSave;
-    Destination editingDestination;
+    private TextView heading;
+    private EditText destinationName;
+    private Button btnSave;
+    private ProgressBar progressBar;
+    private Destination editingDestination;
+
+    private String successMsg = "Destination added successfully";
+    private String progressMsg = "Adding Destination";
+    private String failureMsg = "Failed to add destination. Check internet connection";
+
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
-        View view=getActivity().getLayoutInflater().inflate(R.layout.new_destination,null);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.new_destination, null);
         linkViews(view);
         initViews(view);
 
-        AlertDialog.Builder builder=new AlertDialog.Builder(requireActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setView(view);
 
         return builder.create();
@@ -61,80 +71,81 @@ public class AddDestinationFragment extends DialogFragment {
 
     private void linkViews(View view) {
 
-        heading=view.findViewById(R.id.dest_new_heading);
-        destinationName=view.findViewById(R.id.dest_new_name);
-        btnSave=view.findViewById(R.id.dest_new_btnSave);
+        heading = view.findViewById(R.id.dest_new_heading);
+        destinationName = view.findViewById(R.id.dest_new_name);
+        btnSave = view.findViewById(R.id.dest_new_btnSave);
+        progressBar=view.findViewById(R.id.dest_new_progressBar);
     }
 
     private void initViews(View view) {
 
         heading.setText(getTitle());
-        if(isEditingMode() && getDestination()!=null){
+        if (isEditingMode() && getDestination() != null) {
             destinationName.setText(getDestination().getName());
-        }else
+        } else
             destinationName.setText("");
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(nameIsValid())
+                if (nameIsValid())
                     onSaveDestination();
                 else
-                    showMessage("Please enter a valid name");
+                    Msg.show(requireContext(), "Please enter a valid name");
 
             }
         });
 
     }
 
-    public String getTitle(){
+    public String getTitle() {
         return "Destination name";
     }
 
-    private boolean nameIsValid(){
+    private boolean nameIsValid() {
 
-        if(TextUtils.isEmpty(destinationName.getText().toString().trim()))
+        if (TextUtils.isEmpty(destinationName.getText().toString().trim()))
             return false;
         else
             return true;
     }
 
-    protected String getEnteredName(){
+    protected String getEnteredName() {
 
         return destinationName.getText().toString().trim();
     }
 
-    public void onSaveDestination(){
+    public void onSaveDestination() {
 
-        if(isEditingMode()){
+        if (isEditingMode()) {
 
-        }else{
+        } else {
 
             addDestination();
         }
 
     }
 
-    public boolean isEditingMode(){
+    public boolean isEditingMode() {
 
-        if(getArguments()!=null)
-            return getArguments().getBoolean(KEY_MODE,false);
+        if (getArguments() != null)
+            return getArguments().getBoolean(KEY_MODE, false);
 
         return false;
     }
 
-    protected Destination getDestination(){
+    protected Destination getDestination() {
 
-        if(getArguments()==null)
+        if (getArguments() == null)
             return null;
 
-        if(getArguments().getInt("destId",-1)==-1)
+        if (getArguments().getInt("destId", -1) == -1)
             return null;
 
-        if(editingDestination==null){
+        if (editingDestination == null) {
 
-            editingDestination=new Destination();
-            Bundle arg=getArguments();
+            editingDestination = new Destination();
+            Bundle arg = getArguments();
 
             editingDestination.setId(arg.getInt("destId"));
             editingDestination.setName(arg.getString("destName"));
@@ -146,44 +157,75 @@ public class AddDestinationFragment extends DialogFragment {
         return editingDestination;
     }
 
-    protected int getDestinationType(){
+    protected int getDestinationType() {
 
         return Destination.TYPE_WAREHOUSE;
     }
 
     private void addDestination() {
 
-        FirebaseFirestore db=FirebaseFirestore.getInstance();
+        switch (getDestinationType()) {
 
-        Destination destination=new Destination();
+            case Destination.TYPE_CLIENT:
+                successMsg = "Client added successfully";
+                progressMsg = "Adding client";
+                failureMsg = "Failed to add client. Check internet connection";
+                break;
+
+            case Destination.TYPE_REFILL_STATION:
+                successMsg = "Refill station added successfully";
+                progressMsg = "Adding refill station";
+                failureMsg = "Failed to add refill station. Check internet connection";
+                break;
+
+            case Destination.TYPE_REPAIR_STATION:
+                successMsg = "Repair station added successfully";
+                progressMsg = "Adding repair station";
+                failureMsg = "Failed to repair station. Check internet connection";
+                break;
+
+        }
+
+        startTransaction(successMsg, progressMsg, failureMsg, 1);
+
+
+    }
+
+    //region Transaction overloads ---------------------------------------------
+
+    @Override
+    public void showTransactionProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideTransactionProgressBar() {
+        progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public BaseTransaction getTransactionToRun(int requestCode) {
+
+        Destination destination = new Destination();
         destination.setDestType(getDestinationType());
         destination.setCylinderCount(0);
         destination.setName(getEnteredName());
-        db.runTransaction(new AddDestinationTransaction(destination))
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if(task.isSuccessful()){
 
-                            if(getActivity()!=null)
-                                Msg.show(requireContext(),"Added successfully");
-
-                            if(getDialog()!=null)
-                                getDialog().dismiss();
-
-                        }else{
-
-                            if(getActivity()!=null)
-                                Msg.show(requireContext(),"Error in adding. Check internet connection");
-                        }
-
-                    }
-                });
+        return new AddDestinationTransaction(destination);
 
     }
 
-    protected void showMessage(String msg){
+    @Override
+    public void onTransactionComplete(Task<Void> task, int requestCode) {
+        super.onTransactionComplete(task, requestCode);
 
-        Toast.makeText(requireActivity(),msg,Toast.LENGTH_SHORT).show();
+        if (task.isSuccessful()) {
+            Msg.show(requireContext(), successMsg);
+            getDialog().dismiss();
+        } else {
+            Msg.show(requireContext(), failureMsg);
+        }
     }
+
+    //endregion ---------------------------------------------------------------------
 }

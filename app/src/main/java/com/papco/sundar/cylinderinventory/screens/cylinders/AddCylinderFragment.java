@@ -30,13 +30,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.MetadataChanges;
+import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.TransactionFragment;
 import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.logic.Transactions.AddCylindersTransaction;
 import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
 
-public class AddCylinderFragment extends Fragment implements TransactionRunnerService.TransactionListener {
+public class AddCylinderFragment extends TransactionFragment {
 
     private FirebaseFirestore db;
     private TextView infoView;
@@ -44,8 +47,6 @@ public class AddCylinderFragment extends Fragment implements TransactionRunnerSe
     private TextInputEditText supplierField,cylinderCountField,remarksField;
     private int lastCylinderNumber=-1;
     private ProgressBar progressBar;
-    private TransactionRunnerService transactionService;
-    private TransactionServiceConnection connection;
     private Button btnSave;
 
     @Override
@@ -196,28 +197,10 @@ public class AddCylinderFragment extends Fragment implements TransactionRunnerSe
 
     private void addCylinders(){
 
-        if(TransactionRunnerService.isRunning()){
-            Msg.show(requireContext(),"Already a transaction is running. Try after some time");
-            return;
-        }
-
-        showProgressBar();
-
         String successMsg="Successfully added the cylinders";
         String failMsg="Adding cylinder failed. Check internet connection and try again";
-
-        //starting the service
-        Intent intent=TransactionRunnerService.getStartingIntent(
-                getActivity(),successMsg,"Running transaction",failMsg,1);
-        getActivity().startService(intent);
-
-        //binding to the service
-        Intent bindIntent = new Intent(getActivity(), TransactionRunnerService.class);
-        connection = new TransactionServiceConnection();
-        getActivity().bindService(bindIntent, connection, Context.BIND_AUTO_CREATE);
-
-        //on Successfull binding, onServiceBinded will be called where we allot work to service
-
+        String progressMsg="Adding cylinders";
+        startTransaction(successMsg,progressMsg,failMsg,1);
 
     }
 
@@ -253,22 +236,21 @@ public class AddCylinderFragment extends Fragment implements TransactionRunnerSe
 
     }
 
-    private void onServiceBinded(TransactionRunnerService service){
+    //Transaction overrides
 
-        int noOfCylinders=Integer.parseInt(cylinderCountField.getText().toString());
+    @Override
+    public BaseTransaction getTransactionToRun(int requestCode) {
+
+        int numberOfCylinders=Integer.parseInt(cylinderCountField.getText().toString().trim());
         String supplier=supplierField.getText().toString();
         String remarks=remarksField.getText().toString();
-
-        AddCylindersTransaction transaction=new AddCylindersTransaction(noOfCylinders,supplier,remarks);
-        service.setCallback(this);
-        service.startTransaction(transaction);
+        return new AddCylindersTransaction(numberOfCylinders,supplier,remarks);
 
     }
 
     @Override
-    public void onTransactionComplete(Task<Void> task,int requestCode) {
-
-        hideProgressBar();
+    public void onTransactionComplete(Task<Void> task, int requestCode) {
+        super.onTransactionComplete(task, requestCode);
 
         if(task.isSuccessful()) {
             Msg.show(getActivity(), "Added cylinders successfully");
@@ -276,51 +258,26 @@ public class AddCylinderFragment extends Fragment implements TransactionRunnerSe
         }else{
             Msg.show(getActivity(),"Failed to add cylinders. Check internet connection and try again");
         }
-
     }
 
-    private void showProgressBar(){
-
+    @Override
+    public void showTransactionProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
         btnSave.setEnabled(false);
-
     }
 
-    private void hideProgressBar(){
-
+    @Override
+    public void hideTransactionProgressBar() {
         progressBar.setVisibility(View.INVISIBLE);
         btnSave.setEnabled(true);
-
     }
+
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.d("SUNDAR", "stopping addcylinder fragment ");
-        hideProgressBar();
         listener.remove();
         listener=null;
-        if(transactionService!=null)
-            transactionService.clearCallback();
     }
 
-
-    class TransactionServiceConnection implements ServiceConnection {
-
-
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
-            // TODO: 19-11-2018 update the layout for progress
-            transactionService = ((TransactionRunnerService.TransactionBinder) iBinder).getService();
-            onServiceBinded(transactionService);
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            transactionService = null;
-
-        }
-    }
 }

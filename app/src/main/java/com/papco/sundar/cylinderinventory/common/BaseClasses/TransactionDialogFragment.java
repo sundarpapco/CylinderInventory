@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.Transaction;
@@ -14,7 +14,7 @@ import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
 
 import java.util.List;
 
-public class TransactionFragment extends Fragment implements TransactionRunnable {
+public class TransactionDialogFragment extends DialogFragment implements TransactionRunnable{
 
     private boolean hasPendingWork=false;
     private TransactionRunnerService transactionService;
@@ -80,7 +80,6 @@ public class TransactionFragment extends Fragment implements TransactionRunnable
         service.setCallback(this);
         if(hasPendingWork)
             return;
-
 
         BaseTransaction transaction=getTransactionToRun(service.getRequestCode());
 
@@ -162,4 +161,7 @@ public class TransactionFragment extends Fragment implements TransactionRunnable
 
         }
     }
+
+
+
 }

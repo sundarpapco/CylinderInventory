@@ -15,12 +15,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.TransactionActivity;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.data.Destination;
+import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
+import com.papco.sundar.cylinderinventory.logic.Transactions.CreateAllotmentTransaction;
 
-public class CreateAllotmentActivity extends AppCompatActivity {
+public class CreateAllotmentActivity extends TransactionActivity {
 
     public static void start(Context context, @NonNull Destination destination){
 
@@ -38,6 +45,7 @@ public class CreateAllotmentActivity extends AppCompatActivity {
     private TextInputEditText clientField;
     private TextInputEditText cylindersField;
     private Button btnSave;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,6 +72,7 @@ public class CreateAllotmentActivity extends AppCompatActivity {
         clientField=findViewById(R.id.create_allot_client_name);
         cylindersField=findViewById(R.id.create_allot_cyl_count);
         btnSave=findViewById(R.id.create_allot_btnSave);
+        progressBar=findViewById(R.id.create_allot_progress_bar);
 
     }
 
@@ -94,8 +103,12 @@ public class CreateAllotmentActivity extends AppCompatActivity {
 
         // TODO: 25-02-2019 Create the allotment here
 
+        String successMsg="Alloment created successfully";
+        String progressMsg="Creating allotment";
+        String failedMsg="Error creating allotment";
+
         if(isValidCylinderCount())
-            Msg.show(this,"Create allotment here");
+            startTransaction(successMsg,progressMsg,failedMsg,1);
     }
 
     private boolean isValidCylinderCount(){
@@ -138,5 +151,42 @@ public class CreateAllotmentActivity extends AppCompatActivity {
 
         InputMethodManager imm = (InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.showSoftInput(cylindersField, 0);
+    }
+
+    @Override
+    public void showTransactionProgressBar() {
+
+        progressBar.setVisibility(View.VISIBLE);
+        if(TransactionRunnerService.isRunning())
+            btnSave.setEnabled(false);
+
+    }
+
+    @Override
+    public void hideTransactionProgressBar() {
+        progressBar.setVisibility(View.INVISIBLE);
+        btnSave.setEnabled(true);
+    }
+
+    @Override
+    public BaseTransaction getTransactionToRun(int requestCode) {
+
+        int noOfCylinders=Integer.parseInt(cylindersField.getText().toString().trim());
+        Destination destination=new Destination();
+        destination.setId(getDestinationId());
+        destination.setName(getDestinationName());
+        return new CreateAllotmentTransaction(noOfCylinders,destination);
+    }
+
+    @Override
+    public void onTransactionComplete(Task<Void> task, int requestCode) {
+        super.onTransactionComplete(task, requestCode);
+
+        if(task.isSuccessful()){
+            Msg.show(this,"Allotment created succesfully");
+            finish();
+        }else{
+            Msg.show(this,"Error creating allotment. Check interner connection");
+        }
     }
 }

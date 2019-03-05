@@ -29,8 +29,8 @@ import java.util.List;
 
 public class CylinderSummaryFragment extends Fragment {
 
-    private FirebaseFirestore db=FirebaseFirestore.getInstance();
-    private TextView total,full,empty,damaged,clients,repair,refill,graveyard;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private TextView total, full, empty, damaged, clients, repair, refill, graveyard;
     private ProgressBar progressBar;
     private ConstraintLayout detailsView;
     private ListenerRegistration listener;
@@ -46,36 +46,37 @@ public class CylinderSummaryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view=inflater.inflate(R.layout.cylinder_summary,container,false);
+        View view = inflater.inflate(R.layout.cylinder_summary, container, false);
         linkViews(view);
         initViews(view);
         return view;
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if(listener==null)
-            queryForDocuments();
-        else
-            if(loadedSnapshot!=null)
-                loadDetails(loadedSnapshot);
+    public void onStart() {
+        super.onStart();
+
+        queryForDocuments();
+
     }
 
     private void queryForDocuments() {
 
-        FirebaseFirestore db=FirebaseFirestore.getInstance();
+        if (listener != null)
+            listener.remove();
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
         showProgressBar();
 
-        listener=db.collection("aggregation")
-                .whereEqualTo("type",1)
+        listener = db.collection("aggregation")
+                .whereEqualTo("type", 1)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot querySnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
 
-                        if(e!=null){
-                            if(getActivity()!=null)
-                                Msg.show(requireContext(),"Error loading the summary data." +
+                        if (e != null) {
+                            if (getActivity() != null)
+                                Msg.show(requireContext(), "Error loading the summary data." +
                                         " Check internet connection");
                         }
 
@@ -89,26 +90,26 @@ public class CylinderSummaryFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        ((CylindersActivity)getActivity()).getSupportActionBar().setTitle("Cylinders summary");
+        ((CylindersActivity) getActivity()).getSupportActionBar().setTitle("Cylinders summary");
 
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.cylinders_menu,menu);
+        inflater.inflate(R.menu.cylinders_menu, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
 
             case R.id.mnu_manage_cylinder:
-                ((CylindersActivity)getActivity()).showManageCylinderScreen();
+                ((CylindersActivity) getActivity()).showManageCylinderScreen();
                 return true;
 
             case R.id.mnu_inactive_cylinder:
-                ((CylindersActivity)getActivity()).showInActiveCylinderScreen();
+                ((CylindersActivity) getActivity()).showInActiveCylinderScreen();
                 return true;
 
         }
@@ -116,39 +117,39 @@ public class CylinderSummaryFragment extends Fragment {
         return false;
     }
 
-    private void linkViews(View view){
+    private void linkViews(View view) {
 
-        progressBar=view.findViewById(R.id.cyl_summary_progress_bar);
-        detailsView=view.findViewById(R.id.cyl_summary_details);
-        total=view.findViewById(R.id.cyl_summary_total_count);
-        full=view.findViewById(R.id.cyl_summary_full_count);
-        empty=view.findViewById(R.id.cyl_summary_empty_count);
-        damaged=view.findViewById(R.id.cyl_summary_empty_damage_count);
-        clients=view.findViewById(R.id.cyl_summary_clients_count);
-        refill=view.findViewById(R.id.cyl_summary_refilling_count);
-        repair=view.findViewById(R.id.cyl_summary_repair_count);
-        graveyard=view.findViewById(R.id.cyl_summary_grave_count);
+        progressBar = view.findViewById(R.id.cyl_summary_progress_bar);
+        detailsView = view.findViewById(R.id.cyl_summary_details);
+        total = view.findViewById(R.id.cyl_summary_total_count);
+        full = view.findViewById(R.id.cyl_summary_full_count);
+        empty = view.findViewById(R.id.cyl_summary_empty_count);
+        damaged = view.findViewById(R.id.cyl_summary_empty_damage_count);
+        clients = view.findViewById(R.id.cyl_summary_clients_count);
+        refill = view.findViewById(R.id.cyl_summary_refilling_count);
+        repair = view.findViewById(R.id.cyl_summary_repair_count);
+        graveyard = view.findViewById(R.id.cyl_summary_grave_count);
 
     }
 
-    private void showProgressBar(){
+    private void showProgressBar() {
         detailsView.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
     }
 
-    private void hideProgressBar(){
+    private void hideProgressBar() {
         detailsView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.INVISIBLE);
     }
 
 
-    private void initViews(View view){
+    private void initViews(View view) {
 
-        FloatingActionButton fab=view.findViewById(R.id.add_cyl_fab);
+        FloatingActionButton fab = view.findViewById(R.id.add_cyl_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((CylindersActivity)getActivity()).showAddCylinderScreen();
+                ((CylindersActivity) getActivity()).showAddCylinderScreen();
             }
         });
 
@@ -156,12 +157,12 @@ public class CylinderSummaryFragment extends Fragment {
 
     private void loadDetails(QuerySnapshot querySnapshot) {
 
-        loadedSnapshot=querySnapshot;
-        List<DocumentSnapshot> documentSnapshots=querySnapshot.getDocuments();
+        loadedSnapshot = querySnapshot;
+        List<DocumentSnapshot> documentSnapshots = querySnapshot.getDocuments();
         hideProgressBar();
-        for(DocumentSnapshot document:documentSnapshots){
+        for (DocumentSnapshot document : documentSnapshots) {
 
-            switch (document.getId()){
+            switch (document.getId()) {
 
                 case "cylinders_total":
                     total.setText(asString(document.getLong("count")));
@@ -202,7 +203,7 @@ public class CylinderSummaryFragment extends Fragment {
     }
 
 
-    private String asString(long value){
+    private String asString(long value) {
 
         return Long.toString(value);
     }
@@ -210,8 +211,7 @@ public class CylinderSummaryFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("SUNDAR", "Listener removed ");
-        if(listener!=null)
+        if (listener != null)
             listener.remove();
     }
 }

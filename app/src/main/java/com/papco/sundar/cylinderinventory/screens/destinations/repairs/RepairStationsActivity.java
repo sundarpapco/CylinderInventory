@@ -17,9 +17,9 @@ public class RepairStationsActivity extends DestinationActivity {
 
     @Override
     public void onShowEditDestinationDialog(Destination destination) {
-        AddDestinationFragment fragment=new AddRepairsDialog();
+        /*AddDestinationFragment fragment=new AddRepairsDialog();
         fragment.setArguments(AddDestinationFragment.getStartingArguments(true,destination));
-        fragment.show(getSupportFragmentManager(),"addRefillStation");
+        fragment.show(getSupportFragmentManager(),"addRefillStation");*/
     }
 
     @Override

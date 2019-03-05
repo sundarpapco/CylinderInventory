@@ -15,10 +15,10 @@ public class Destination {
     public static final int TYPE_REPAIR_STATION=5;
 
 
-    private int id;
-    private String name;
-    private int cylinderCount;
-    private int destType;
+    private int id=0;
+    private String name="";
+    private int cylinderCount=0;
+    private int destType=TYPE_CLIENT;
     @Exclude
     public SpannableString highlightedName;
 

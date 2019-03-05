@@ -40,9 +40,9 @@ public class ClientsActivity extends DestinationActivity {
 
     @Override
     public void onShowEditDestinationDialog(Destination destination) {
-        AddDestinationFragment fragment=new AddClientDialog();
+        /*AddDestinationFragment fragment=new AddClientDialog();
         fragment.setArguments(AddDestinationFragment.getStartingArguments(true,destination));
-        fragment.show(getSupportFragmentManager(),"editDestination");
+        fragment.show(getSupportFragmentManager(),"editDestination");*/
     }
 
     @Override

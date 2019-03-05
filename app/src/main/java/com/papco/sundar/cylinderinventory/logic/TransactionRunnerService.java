@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -15,13 +16,17 @@ import android.util.Log;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.api.LogDescriptor;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.screens.mainscreen.MainActivity;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class TransactionRunnerService extends Service {
 
@@ -64,13 +69,14 @@ public class TransactionRunnerService extends Service {
     private final int NOTIFICATION_ID = 2;
 
     private NotificationCompat.Builder builder;
-    private Transaction.Function<Void> transaction;
+    private BaseTransaction transaction;
     private TransactionListener callback = null;
     private String successMessage;
     private String failureMessage;
     private String progressMessage;
     private TransactionBinder binder;
     private int requestCode;
+    private List<Integer> prefetchList=null;
 
 
     @Override
@@ -125,14 +131,49 @@ public class TransactionRunnerService extends Service {
 
     }
 
-    public void startTransaction(Transaction.Function<Void> transaction) {
+    public void startTransaction(BaseTransaction transaction) {
 
         if (this.transaction != null)
             return;
         else
             this.transaction=transaction;
 
-        Log.d("SUNDAR", "starting transaction work ");
+        if(prefetchList==null) {
+            runTheTransaction();
+        }else
+            runPrefetching();
+
+    }
+
+    private void runPrefetching(){
+
+        BatchReader reader=new BatchReader(prefetchList, new BatchReader.BatchReaderListener() {
+            @Override
+            public void onBatchReadComplete(List<DocumentSnapshot> documentSnapshots) {
+                if(documentSnapshots==null) { // prefetch failed
+
+                    if(callback!=null) {
+                        callback.onTransactionComplete(null, requestCode);
+                        stopServiceSuccess();
+                        return;
+                    }else {
+                        Msg.show(TransactionRunnerService.this,failureMessage);
+                        stopServiceFailure(failureMessage);
+                    }
+                }else {
+
+                    transaction.setPrefetchedDocuments(documentSnapshots);
+                    runTheTransaction();
+                }
+            }
+        });
+
+        reader.fetchDocuments();
+
+    }
+
+    private void runTheTransaction(){
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.runTransaction(transaction).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -153,32 +194,48 @@ public class TransactionRunnerService extends Service {
                         callback.onTransactionComplete(task,requestCode);
                         stopServiceSuccess();
                     } else {
-                        Msg.show(TransactionRunnerService.this, failureMessage);
-                        stopServiceFailure();
+                        FirebaseFirestoreException exception=(FirebaseFirestoreException)task.getException();
+                        if(exception.getCode()==FirebaseFirestoreException.Code.CANCELLED) {
+                            Msg.show(TransactionRunnerService.this, exception.getMessage());
+                            stopServiceFailure(exception.getMessage());
+                        }else {
+                            Msg.show(TransactionRunnerService.this, failureMessage);
+                            stopServiceFailure(failureMessage);
+                        }
                     }
                 }
             }
         });
+
     }
 
     public void setCallback(TransactionListener callback){
         this.callback=callback;
     }
 
+    public void setPrefetchList(List<Integer> prefetchList){
+        this.prefetchList=prefetchList;
+    }
+
     public void clearCallback(){
         callback=null;
     }
 
-    private void stopServiceFailure() {
+    private void stopServiceFailure(String msg) {
 
         isRunning=false;
 
         transaction=null;
+        prefetchList=null;
         callback=null;
         builder.setContentTitle("Transaction failed");
-        builder.setContentText(failureMessage);
+        builder.setContentText(msg);
         NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, builder.build());
-        stopForeground(false);
+        if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.N)
+            stopForeground(STOP_FOREGROUND_DETACH);
+        else
+            stopForeground(false);
+
         stopSelf();
 
     }
@@ -188,6 +245,7 @@ public class TransactionRunnerService extends Service {
         isRunning=false;
 
         transaction=null;
+        prefetchList=null;
         callback=null;
         stopForeground(true);
         stopSelf();
@@ -206,6 +264,8 @@ public class TransactionRunnerService extends Service {
 
     public interface TransactionListener {
 
+        // in this callback, task will be null if there is any prefetch fail
+        //check for null if your transaction have prefetch
         void onTransactionComplete(Task<Void> task,int requestCode);
     }
 

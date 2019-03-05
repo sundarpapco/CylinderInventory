@@ -1,8 +1,18 @@
 package com.papco.sundar.cylinderinventory.data;
 
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.IgnoreExtraProperties;
+
+import java.text.SimpleDateFormat;
 import java.util.List;
 
+@IgnoreExtraProperties
 public class Allotment {
+
+    public static final int STATE_ALLOTTED =1;
+    public static final int STATE_PICKED_UP=2;
+    public static final int STATE_READY_FOR_INVOICE=3;
+    @Exclude private static final SimpleDateFormat format=new SimpleDateFormat("dd/MM/yyyy, hh:mm a");
 
     private int id;
     private int clientId;
@@ -10,8 +20,7 @@ public class Allotment {
     private int numberOfCylinders;
     private int state;
     private long timeStamp=0;
-
-    List<Integer> cylinders;
+    private List<Integer> cylinders;
 
     public int getId() {
         return id;
@@ -68,4 +77,17 @@ public class Allotment {
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }
+
+    @Exclude
+    public String getStringId(){
+
+        return Integer.toString(id);
+    }
+
+    @Exclude
+    public String getStringTimeStamp(){
+
+        return format.format(timeStamp);
+    }
+
 }

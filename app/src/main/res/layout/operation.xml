@@ -85,6 +85,14 @@
                 android:text="Cylinders"
                 android:textColor="@android:color/black" />
 
+            <ProgressBar
+                android:id="@+id/operation_progress_bar"
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/operation_inward_cyl_count"
+                android:layout_centerHorizontal="true"/>
+
 
         </RelativeLayout>
 

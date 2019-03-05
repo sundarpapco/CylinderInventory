@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.data.Allotment;
-import com.papco.sundar.cylinderinventory.data.AllotmentStates;
 import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
 
     private List<Allotment> data;
     private RecyclerListener<Allotment> callback;
-    private int colorBlue,colorOrange,colorGreen;
     private GradientDrawable round;
 
     public AllotmentAdapter(Context context,@NonNull RecyclerListener<Allotment> callback) {
@@ -31,9 +29,6 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
         this.data = new ArrayList<>();
         this.callback = callback;
         round=(GradientDrawable)context.getResources().getDrawable(R.drawable.round_green);
-        colorBlue=context.getResources().getColor(android.R.color.holo_blue_bright);
-        colorOrange=context.getResources().getColor(android.R.color.holo_orange_light);
-        colorGreen=context.getResources().getColor(android.R.color.holo_green_light);
 
     }
 
@@ -66,7 +61,7 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
     class AllotmentVH extends RecyclerView.ViewHolder {
 
         private View colorView;
-        private TextView status, destination, cylinderCount;
+        private TextView status, destination, cylinderCount,timeStamp;
 
 
         public AllotmentVH(@NonNull final View itemView) {
@@ -76,6 +71,8 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
             destination = itemView.findViewById(R.id.batch_item_destination_name);
             cylinderCount = itemView.findViewById(R.id.batch_item_no_of_cylinders);
             colorView=itemView.findViewById(R.id.view);
+            timeStamp=itemView.findViewById(R.id.batch_item_timestamp);
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -97,21 +94,22 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
             Allotment allotment = data.get(getAdapterPosition());
             switch (allotment.getState()) {
 
-                case AllotmentStates.STATE_ALLOTED:
+                case Allotment.STATE_ALLOTTED:
                     status.setText("Alloted");
                     colorView.setBackgroundResource(R.drawable.round_blue);
                     break;
 
-                case AllotmentStates.STATE_PICKED_UP:
+                case Allotment.STATE_PICKED_UP:
                     status.setText("Picked up");
                     colorView.setBackgroundResource(R.drawable.round_orange);
                     break;
 
-                case AllotmentStates.STATE_READY_FOR_INVOICE:
+                case Allotment.STATE_READY_FOR_INVOICE:
                     status.setText("Ready for Invoice");
                     colorView.setBackgroundResource(R.drawable.round_green);
                     break;
             }
+            timeStamp.setText(allotment.getStringTimeStamp());
             destination.setText(allotment.getClientName());
             cylinderCount.setText(Integer.toString(allotment.getNumberOfCylinders())+ " Cylinders");
         }

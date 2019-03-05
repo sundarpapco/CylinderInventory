@@ -7,7 +7,10 @@
     <color name="borderGrey">#707070</color>
     <color name="lightGreen">#9FFF20</color>
     <color name="darkGreen">#5E8529</color>
+    <color name="Orange">#FF9B20</color>
+    <color name="lightblue">#6BBFE6</color>
+    <color name="temp">#C2185B</color>
     <color name="progressOverlay">#74000000</color>
 
-    <color name="Orange">#FF9B20</color>
+
 </resources>

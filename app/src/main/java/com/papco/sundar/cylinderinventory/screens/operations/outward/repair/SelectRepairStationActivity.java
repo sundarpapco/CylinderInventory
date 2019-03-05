@@ -22,7 +22,7 @@ public class SelectRepairStationActivity extends RepairStationsActivity {
 
     @Override
     public void onRecyclerItemClicked(Destination item, int position) {
-        OperationOutwardActivity.start(this,item,RepOutOperationActivity.class);
+        OperationOutwardActivity.start(this,item, RepairOperationActivity.class);
         finish();
     }
 }

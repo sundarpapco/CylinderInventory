@@ -40,10 +40,12 @@
         app:layout_constraintTop_toTopOf="@+id/inactive_cyl_search_layout" />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_inactive_list"
+        android:id="@+id/inactive_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/inactive_cyl_search_layout"
         tools:layout_editor_absoluteX="0dp" />
@@ -57,7 +59,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/recycler_inactive_list"
+        app:layout_constraintBottom_toBottomOf="@+id/inactive_recycler"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/inactive_cyl_search_layout" />

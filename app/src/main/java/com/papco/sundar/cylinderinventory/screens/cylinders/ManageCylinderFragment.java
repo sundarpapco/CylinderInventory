@@ -2,16 +2,10 @@ package com.papco.sundar.cylinderinventory.screens.cylinders;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.NestedScrollView;
 import android.text.TextUtils;
 import android.util.Log;
@@ -33,16 +27,17 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.TransactionFragment;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.data.Cylinder;
 import com.papco.sundar.cylinderinventory.data.Destination;
-import com.papco.sundar.cylinderinventory.logic.TransactionRunner;
 import com.papco.sundar.cylinderinventory.logic.Transactions.DeleteCylinderTransaction;
 import com.papco.sundar.cylinderinventory.logic.Transactions.MarkDamageTransaction;
-import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
 
-public class ManageCylinderFragment extends Fragment implements TransactionRunner {
+public class ManageCylinderFragment extends TransactionFragment {
 
     private final int REQUEST_REPAIR = 1;
     private final int REQUEST_DELETE = 2;
@@ -53,13 +48,13 @@ public class ManageCylinderFragment extends Fragment implements TransactionRunne
     private View clickSense;
     private EditText searchBox;
     private FirebaseFirestore db;
-    private TransactionServiceConnection connection;
-    private TransactionRunnerService transactionService;
     private ListenerRegistration activeListener;
 
     private TextView cylinderNo, purchaseDate, supplier, remarks, refills, repairs, location, status;
 
     private Button btnMarkRepair, btnDelete;
+
+    //region system Overloads --------------------------------------------
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,8 +76,8 @@ public class ManageCylinderFragment extends Fragment implements TransactionRunne
     @Override
     public void onStart() {
         super.onStart();
-        if(!TextUtils.isEmpty(searchBox.getText().toString()))
-            checkForActiveCylinder(searchBox.getText().toString());
+        if (detailsView.getVisibility()==View.VISIBLE)
+            checkForActiveCylinder(cylinderNo.getText().toString());
     }
 
     @Override
@@ -90,6 +85,14 @@ public class ManageCylinderFragment extends Fragment implements TransactionRunne
         super.onResume();
         ((CylindersActivity) getActivity()).getSupportActionBar().setTitle("Manage cylinder");
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        clearCallbacks();
+    }
+
+    //endregion ------------------------------------------------------------
 
     private void linkViews(View view) {
 
@@ -154,6 +157,8 @@ public class ManageCylinderFragment extends Fragment implements TransactionRunne
 
     }
 
+    //region Operation initiators --------------------------------
+
     private void confirmDeletion() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
@@ -191,27 +196,28 @@ public class ManageCylinderFragment extends Fragment implements TransactionRunne
 
     private void deleteCylinder() {
 
-        showSmallProgressBar();
 
-        String successMsg = "Cylinder deleted";
+        String successMsg = "Success: Cylinder deleted";
+        String progressMsg="Deleting cylinder";
         String failureMsg = "Deleting cylinder failed. Please try again";
 
-        startService(successMsg,failureMsg,REQUEST_DELETE);
+        startTransaction(successMsg,progressMsg,failureMsg,REQUEST_DELETE);
 
     }
 
     private void markCylinderDamaged() {
 
-        showSmallProgressBar();
-
-        String successMsg = "Cylinder marked as damaged";
+        String successMsg = "Success: Cylinder marked as damaged";
+        String progressMsg="Marking cylinder as damaged";
         String failureMsg = "Could not mark cylinder as damaged. Please try again";
 
-        startService(successMsg, failureMsg, REQUEST_REPAIR);
-
+        startTransaction(successMsg,progressMsg,failureMsg,REQUEST_REPAIR);
 
     }
 
+    //endregion ----------------------------------------------------
+
+    //region Cylinder searching methods ------------------------------
 
     private void searchCylinder(String searchId) {
 
@@ -301,8 +307,6 @@ public class ManageCylinderFragment extends Fragment implements TransactionRunne
 
     private void loadCylinder(DocumentSnapshot data) {
 
-        Log.d("SUNDAR", "loadCylinder: ");
-
         Cylinder cylinder = data.toObject(Cylinder.class);
 
         hideProgressBar();
@@ -333,16 +337,26 @@ public class ManageCylinderFragment extends Fragment implements TransactionRunne
 
         // we cannot mark a cylinder as repair when a cylinder is already damaged
         if (cylinder.isDamaged()) {
-            status.setText("DAMAGED");
+            if(cylinder.getLocationId()==Destination.TYPE_WAREHOUSE)
+                status.setText("DAMAGED");
+            else
+                status.setText("SENT FOR REPAIR");
+
             btnMarkRepair.setVisibility(View.INVISIBLE);
             return;
         }
 
 
         if (cylinder.isEmpty())
-            status.setText("EMPTY");
+            if(cylinder.getLocationId()==Destination.TYPE_WAREHOUSE)
+                status.setText("EMPTY");
+            else
+                status.setText("SENT FOR REFILLING");
         else
-            status.setText("FULL");
+            if(cylinder.getLocationId()!=Destination.TYPE_WAREHOUSE)
+                status.setText("WITH CLIENT");
+            else
+                status.setText("FULL");
 
     }
 
@@ -359,76 +373,28 @@ public class ManageCylinderFragment extends Fragment implements TransactionRunne
         progressBar.setVisibility(View.INVISIBLE);
     }
 
-    private void showSmallProgressBar() {
+    // endregion ------------------------------------------------------
 
-        smallProgressBar.setVisibility(View.VISIBLE);
-        btnMarkRepair.setEnabled(false);
-        btnDelete.setEnabled(false);
-
-    }
-
-    private void hideSmallProgressBar() {
-
-        smallProgressBar.setVisibility(View.INVISIBLE);
-        btnMarkRepair.setEnabled(true);
-        btnDelete.setEnabled(true);
-    }
-
-    private void hideKeyboard() {
-
-        InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(clickSense.getWindowToken(), 0);
-    }
+    //region Transaction Overloads --------------------------------------------------
 
     @Override
-    public void startService(String successMsg, String failureMsg, int requestCode) {
+    public BaseTransaction getTransactionToRun(int requestCode) {
 
-        Intent startIntent = TransactionRunnerService.getStartingIntent(
-                getActivity(), successMsg,"Running Transaction", failureMsg,requestCode);
+        int cylinderNumber = Integer.parseInt(cylinderNo.getText().toString());
 
-        getActivity().startService(startIntent);
+        if (requestCode == REQUEST_REPAIR)
+            return new MarkDamageTransaction(cylinderNumber);
 
-        //binding to the service
-        Intent bindIntent = new Intent(getActivity(), TransactionRunnerService.class);
-        connection = new TransactionServiceConnection();
-        getActivity().bindService(bindIntent, connection, Context.BIND_AUTO_CREATE);
-    }
+        if (requestCode == REQUEST_DELETE)
+            return new DeleteCylinderTransaction(cylinderNumber);
 
-    @Override
-    public void onServiceBinded(TransactionRunnerService transactionService) {
-
-        if (transactionService.getRequestCode() == REQUEST_REPAIR) {
-            int cylinderNumber = Integer.parseInt(cylinderNo.getText().toString());
-            MarkDamageTransaction transaction = new MarkDamageTransaction(cylinderNumber);
-            transactionService.setCallback(this);
-            transactionService.startTransaction(transaction);
-        } else {
-            int cylinderNumber = Integer.parseInt(cylinderNo.getText().toString());
-            DeleteCylinderTransaction deleteTransaction=new DeleteCylinderTransaction(cylinderNumber);
-            transactionService.setCallback(this);
-            transactionService.startTransaction(deleteTransaction);
-        }
-
-    }
-
-    @Override
-    public void clearCallbacks() {
-
-        hideSmallProgressBar();
-
-        if (transactionService != null)
-            transactionService.clearCallback();
-
-        if (activeListener != null)
-            activeListener.remove();
-        activeListener=null;
-
+        return null;
     }
 
     @Override
     public void onTransactionComplete(Task<Void> task, int requestCode) {
+        super.onTransactionComplete(task, requestCode);
 
-        hideSmallProgressBar();
         if (!task.isSuccessful()) {
             FirebaseFirestoreException exception = (FirebaseFirestoreException) task.getException();
             if (exception.getCode() == FirebaseFirestoreException.Code.CANCELLED)
@@ -436,34 +402,39 @@ public class ManageCylinderFragment extends Fragment implements TransactionRunne
             else
                 Msg.show(requireActivity(), "Error connecting to server. Check internet connection");
         }
-
-
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        clearCallbacks();
+    public void showTransactionProgressBar() {
+
+        smallProgressBar.setVisibility(View.VISIBLE);
+        btnMarkRepair.setEnabled(false);
+        btnDelete.setEnabled(false);
     }
 
+    @Override
+    public void hideTransactionProgressBar() {
 
-    class TransactionServiceConnection implements ServiceConnection {
+        smallProgressBar.setVisibility(View.INVISIBLE);
+        btnMarkRepair.setEnabled(true);
+        btnDelete.setEnabled(true);
 
-
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
-            transactionService = ((TransactionRunnerService.TransactionBinder) iBinder).getService();
-            onServiceBinded(transactionService);
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            transactionService = null;
-
-        }
     }
 
+    //endregion ----------------------------------------------------------------
+
+    private void hideKeyboard() {
+
+        InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(clickSense.getWindowToken(), 0);
+    }
+
+    public void clearCallbacks() {
+
+        if (activeListener != null)
+            activeListener.remove();
+        activeListener = null;
+
+    }
 
 }

@@ -12,17 +12,23 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.common.SpacingDecoration;
+import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
 import com.papco.sundar.cylinderinventory.data.Allotment;
-import com.papco.sundar.cylinderinventory.data.AllotmentStates;
 import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 import com.papco.sundar.cylinderinventory.screens.operations.outward.Invoice.InvoiceOperationActivity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class AllotmentActivity extends AppCompatActivity implements RecyclerListener<Allotment> {
@@ -30,6 +36,8 @@ public class AllotmentActivity extends AppCompatActivity implements RecyclerList
 
     private RecyclerView recyclerView;
     private AllotmentAdapter adapter;
+    private ListenerRegistration listenerRegistration;
+    private ProgressBar progressBar;
 
 
     @Override
@@ -45,6 +53,7 @@ public class AllotmentActivity extends AppCompatActivity implements RecyclerList
     private void linkViews() {
 
         recyclerView=findViewById(R.id.allotment_recycler);
+        progressBar=findViewById(R.id.allotment_progress_bar);
     }
 
     private void initViews() {
@@ -53,7 +62,6 @@ public class AllotmentActivity extends AppCompatActivity implements RecyclerList
         adapter=new AllotmentAdapter(this,this);
         recyclerView.addItemDecoration(new SpacingDecoration(this,SpacingDecoration.VERTICAL,0,16,26));
         recyclerView.setAdapter(adapter);
-        adapter.setData(getDummyData());
 
         FloatingActionButton fab=findViewById(R.id.allotment_fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -66,6 +74,11 @@ public class AllotmentActivity extends AppCompatActivity implements RecyclerList
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        loadAllotments();
+    }
 
     private void setupToolBar() {
 
@@ -75,6 +88,37 @@ public class AllotmentActivity extends AppCompatActivity implements RecyclerList
         actionBar.setTitle("Allotments");
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+
+    }
+
+    private void loadAllotments(){
+
+
+        progressBar.setVisibility(View.VISIBLE);
+        FirebaseFirestore db=FirebaseFirestore.getInstance();
+        if(listenerRegistration!=null)
+            listenerRegistration.remove();
+
+        listenerRegistration=db.collection(DbPaths.COLLECTION_ALLOTMENT)
+                .addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@javax.annotation.Nullable QuerySnapshot querySnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
+
+                        progressBar.setVisibility(View.INVISIBLE);
+                        if(e!=null){
+                            Msg.show(AllotmentActivity.this,"Error connecting to server. Please check internet connection");
+                            return;
+                        }
+
+                        List<DocumentSnapshot> documentSnapshots=querySnapshot.getDocuments();
+                        List<Allotment> allotments=new ArrayList<>();
+                        for(DocumentSnapshot documentSnapshot:documentSnapshots){
+                            allotments.add(documentSnapshot.toObject(Allotment.class));
+                        }
+                        adapter.setData(allotments);
+                    }
+                });
+
 
     }
 
@@ -93,9 +137,15 @@ public class AllotmentActivity extends AppCompatActivity implements RecyclerList
     @Override
     public void onRecyclerItemClicked(Allotment item, int position) {
 
-        if(item.getState()==AllotmentStates.STATE_READY_FOR_INVOICE){
+        if(item.getState()==Allotment.STATE_READY_FOR_INVOICE){
 
             InvoiceOperationActivity.start(this,item);
+
+        }
+
+        if(item.getState()==Allotment.STATE_ALLOTTED){
+
+            pickupAllotment(item);
 
         }
 
@@ -104,7 +154,7 @@ public class AllotmentActivity extends AppCompatActivity implements RecyclerList
     @Override
     public void onRecyclerItemLongClicked(final Allotment item, int position, View view) {
 
-        if(item.getState()!=AllotmentStates.STATE_ALLOTED)
+        if(item.getState()!=Allotment.STATE_PICKED_UP)
             return;
 
         PopupMenu popupMenu=new PopupMenu(this,view);
@@ -115,7 +165,7 @@ public class AllotmentActivity extends AppCompatActivity implements RecyclerList
 
                 if(menuItem.getItemId()==R.id.mnu_allotment_pickup){
 
-                    onPickupAllotment(item);
+                    pickupAllotment(item);
                     return true;
                 }
 
@@ -133,44 +183,10 @@ public class AllotmentActivity extends AppCompatActivity implements RecyclerList
 
     }
 
-    protected void onPickupAllotment(Allotment allotment){
+    protected void pickupAllotment(Allotment allotment){
 
-        // TODO: 25-02-2019 add code to pickup allotment here after validation
         FillCylindersActivity.start(this,allotment);
 
     }
 
-
-
-    private List<Allotment> getDummyData(){
-
-        List<Allotment> data=new ArrayList<>();
-        Allotment item1=new Allotment();
-        item1.setId(1);
-        item1.setClientId(1);
-        item1.setNumberOfCylinders(8);
-        item1.setState(AllotmentStates.STATE_ALLOTED);
-        item1.setClientName("Sri vidhya Hospitals");
-
-        Allotment item2=new Allotment();
-        item2.setId(2);
-        item2.setClientId(2);
-        item2.setNumberOfCylinders(4);
-        item2.setState(AllotmentStates.STATE_PICKED_UP);
-        item2.setClientName("Appolo hospitals");
-
-        Allotment item3=new Allotment();
-        item3.setId(3);
-        item3.setClientId(3);
-        item3.setNumberOfCylinders(12);
-        item3.setState(AllotmentStates.STATE_READY_FOR_INVOICE);
-        item3.setClientName("Malar hospitals pvt ltd");
-        item3.setCylinders(Arrays.asList(23,56,78,97));
-
-        data.add(item1);
-        data.add(item2);
-        data.add(item3);
-        return data;
-
-    }
 }
