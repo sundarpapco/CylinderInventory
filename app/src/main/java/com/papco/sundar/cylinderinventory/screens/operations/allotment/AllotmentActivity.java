@@ -21,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.ConnectivityActivity;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.common.SpacingDecoration;
 import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
@@ -31,7 +32,7 @@ import com.papco.sundar.cylinderinventory.screens.operations.outward.Invoice.Inv
 import java.util.ArrayList;
 import java.util.List;
 
-public class AllotmentActivity extends AppCompatActivity implements RecyclerListener<Allotment> {
+public class AllotmentActivity extends ConnectivityActivity implements RecyclerListener<Allotment> {
 
 
     private RecyclerView recyclerView;

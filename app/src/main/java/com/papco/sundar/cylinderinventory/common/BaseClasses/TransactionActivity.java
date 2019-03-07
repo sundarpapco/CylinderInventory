@@ -14,7 +14,7 @@ import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
 
 import java.util.List;
 
-public class TransactionActivity extends AppCompatActivity implements TransactionRunnable{
+public class TransactionActivity extends ConnectivityActivity implements TransactionRunnable{
 
     private boolean hasPendingWork=false;
     private TransactionRunnerService transactionService;

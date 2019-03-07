@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#BEBEBE</color>
     <color name="colorAccent">#8E0DF1</color>
@@ -11,6 +12,6 @@
     <color name="lightblue">#6BBFE6</color>
     <color name="temp">#C2185B</color>
     <color name="progressOverlay">#74000000</color>
-
+    <color name="ConnectionFailRed">#FF3B3B</color>
 
 </resources>

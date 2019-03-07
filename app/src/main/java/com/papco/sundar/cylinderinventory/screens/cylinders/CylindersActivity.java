@@ -6,13 +6,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.ConnectivityActivity;
+import com.papco.sundar.cylinderinventory.screens.cylinders.inactiveCylinders.InActiveCylindersFragment;
 
-public class CylindersActivity extends AppCompatActivity {
+public class CylindersActivity extends ConnectivityActivity {
 
 
 

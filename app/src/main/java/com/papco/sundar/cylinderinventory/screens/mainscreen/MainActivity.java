@@ -30,6 +30,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.TestTransaction;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.ConnectivityActivity;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.common.SpacingDecoration;
 import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
@@ -50,7 +51,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ConnectivityActivity {
 
     public static final String NOTIFICATION_CHANNEL_ID = "transactionChannelID";
     public static final String NOTIFICATION_CHANNEL_NAME = "Cylinder Inventory";

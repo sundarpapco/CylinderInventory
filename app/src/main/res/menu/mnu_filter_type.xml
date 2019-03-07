@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/mnu_filter_type_all"
+        android:title="All"/>
+
+    <item android:id="@+id/mnu_filter_type_warehouse"
+        android:title="Warehouse"/>
+
+    <item android:id="@+id/mnu_filter_type_clients"
+        android:title="Clients"/>
+
+    <item android:id="@+id/mnu_filter_refill_stations"
+        android:title="Refill stations"/>
+
+    <item android:id="@+id/mnu_filter_repair_stations"
+        android:title="Repair stations"/>
+
+</menu>

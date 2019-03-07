@@ -20,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.ConnectivityActivity;
 import com.papco.sundar.cylinderinventory.common.DividerDecoration;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
@@ -30,7 +31,7 @@ import com.papco.sundar.cylinderinventory.screens.destinations.clients.ClientsAc
 import java.util.ArrayList;
 import java.util.List;
 
-public class DestinationActivity extends AppCompatActivity implements RecyclerListener<Destination> {
+public class DestinationActivity extends ConnectivityActivity implements RecyclerListener<Destination> {
 
     private RecyclerView recyclerView;
     private DestinationAdapter adapter;
