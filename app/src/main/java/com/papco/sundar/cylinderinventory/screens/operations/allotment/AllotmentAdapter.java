@@ -3,8 +3,8 @@ package com.papco.sundar.cylinderinventory.screens.operations.allotment;
 
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +28,7 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
 
         this.data = new ArrayList<>();
         this.callback = callback;
-        round=(GradientDrawable)context.getResources().getDrawable(R.drawable.round_green);
+        round=(GradientDrawable)context.getResources().getDrawable(R.drawable.batch_item_round);
 
     }
 
@@ -106,7 +106,7 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
 
                 case Allotment.STATE_READY_FOR_INVOICE:
                     status.setText("Ready for Invoice");
-                    colorView.setBackgroundResource(R.drawable.round_green);
+                    colorView.setBackgroundResource(R.drawable.batch_item_round);
                     break;
             }
             timeStamp.setText(allotment.getStringTimeStamp());

@@ -1,7 +1,7 @@
 package com.papco.sundar.cylinderinventory.screens.cylinders.inactiveCylinders;
 
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;

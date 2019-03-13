@@ -3,9 +3,9 @@ package com.papco.sundar.cylinderinventory.screens.operations.outward.common;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import com.google.android.material.textfield.TextInputLayout;
 
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.data.Destination;

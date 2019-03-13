@@ -5,7 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -88,10 +88,6 @@ public class DividerDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void onDrawOver(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
 
-        //leftmargin=context.getResources().getDimensionPixelSize(R.dimen.fab_margin);
-        //rightmargin=(parent.getWidth()-parent.getPaddingEnd())-leftmargin;
-        //leftmargin=sixteen_dp;
-        //rightmargin=parent.getWidth()-sixteen_dp;
         int rightMargin=parent.getWidth()-rightmargin;
 
         for(int i=0;i<parent.getChildCount();++i){

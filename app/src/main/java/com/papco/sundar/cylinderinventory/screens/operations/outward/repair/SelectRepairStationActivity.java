@@ -1,7 +1,7 @@
 package com.papco.sundar.cylinderinventory.screens.operations.outward.repair;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.papco.sundar.cylinderinventory.data.Destination;
 import com.papco.sundar.cylinderinventory.screens.destinations.repairs.RepairStationsActivity;

@@ -5,8 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import android.view.View;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -109,7 +110,18 @@ public class InvoiceOperationActivity extends OperationOutwardActivity {
     }
 
     @Override
+    public void hideTransactionProgressBar() {
+        super.hideTransactionProgressBar();
+        hideFab();
+    }
+
+    @Override
     public void onRecyclerItemClicked(Integer item, int position) {
+
+    }
+
+    @Override
+    public void onRecyclerItemLongClicked(Integer item, int position, View view) {
 
     }
 

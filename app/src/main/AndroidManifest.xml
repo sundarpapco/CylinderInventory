@@ -51,6 +51,8 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".screens.operations.outward.Invoice.InvoiceOperationActivity"
             android:screenOrientation="portrait"/>
+        <activity android:name=".screens.batchDetail.BatchDetailActivity"
+            android:screenOrientation="portrait"/>
 
         <service android:name=".logic.TransactionRunnerService"
             android:exported="false"/>

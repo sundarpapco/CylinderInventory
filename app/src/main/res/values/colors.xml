@@ -6,12 +6,23 @@
     <color name="colorAccent">#8E0DF1</color>
 
     <color name="borderGrey">#707070</color>
-    <color name="lightGreen">#9FFF20</color>
-    <color name="darkGreen">#5E8529</color>
-    <color name="Orange">#FF9B20</color>
-    <color name="lightblue">#6BBFE6</color>
-    <color name="temp">#C2185B</color>
+    <color name="invoice_green">#9FFF20</color>
+    <color name="fci_green">#5E8529</color>
+    <color name="rci_orange">#FF9B20</color>
+    <color name="ecr_blue">#6BBFE6</color>
+    <color name="rep_red">@android:color/holo_red_dark</color>
+    <color name="ref_pink">#7B1FA2</color>
+
+
     <color name="progressOverlay">#74000000</color>
     <color name="ConnectionFailRed">#FF3B3B</color>
+
+    <color name="invoice_mild_green">#D6FF9F</color>
+    <color name="fci_mild_green">#B6E670</color>
+    <color name="rci_mild_orange">#FFCA89</color>
+    <color name="ecr_mild_blue">#A6D4E7</color>
+    <color name="rep_mild_red">#FF8A8A</color>
+    <color name="ref_mild_pink">#B9B0BE</color>
+
 
 </resources>
