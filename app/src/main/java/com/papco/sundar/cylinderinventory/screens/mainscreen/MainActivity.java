@@ -17,6 +17,7 @@ import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.ConnectivityActivity;
 import com.papco.sundar.cylinderinventory.common.SpacingDecoration;
 import com.papco.sundar.cylinderinventory.data.Batch;
+import com.papco.sundar.cylinderinventory.logic.LoadMoreListener;
 import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 import com.papco.sundar.cylinderinventory.screens.batchDetail.BatchDetailActivity;
 import com.papco.sundar.cylinderinventory.screens.cylinders.CylindersActivity;
@@ -124,7 +125,7 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
         SpacingDecoration decoration=new SpacingDecoration(this,SpacingDecoration.VERTICAL,18,12,24);
         adapter=new BatchFeedAdapter(getApplicationContext(),this);
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
-        scrollListener=new BatchFeedScrollListener(layoutManager, new BatchFeedScrollListener.LoadMoreListener() {
+        scrollListener=new BatchFeedScrollListener(layoutManager, new LoadMoreListener() {
             @Override
             public void loadMoreData() {
                 viewModel.loadNextPage(adapter.getLastLoadedDocument());

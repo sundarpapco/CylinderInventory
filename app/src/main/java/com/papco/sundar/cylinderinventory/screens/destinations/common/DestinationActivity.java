@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -18,6 +20,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.ConnectivityActivity;
@@ -27,6 +30,7 @@ import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
 import com.papco.sundar.cylinderinventory.data.Destination;
 import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 import com.papco.sundar.cylinderinventory.screens.destinations.clients.ClientsActivity;
+import com.papco.sundar.cylinderinventory.screens.destinations.destinationDetail.DestinationDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +42,8 @@ public class DestinationActivity extends ConnectivityActivity implements Recycle
     private ProgressBar progressBar;
     private SearchView searchView;
     private FloatingActionButton fab;
+
+    private ListenerRegistration listenerRegistration;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,7 +69,7 @@ public class DestinationActivity extends ConnectivityActivity implements Recycle
     @Override
     public void onRecyclerItemClicked(Destination item,int position) {
 
-        onShowEditDestinationDialog(item);
+        DestinationDetailActivity.start(this,item);
 
     }
 
@@ -72,7 +78,12 @@ public class DestinationActivity extends ConnectivityActivity implements Recycle
 
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(listenerRegistration!=null)
+            listenerRegistration.remove();
+    }
 
     private void linkViews() {
 
@@ -134,12 +145,13 @@ public class DestinationActivity extends ConnectivityActivity implements Recycle
 
     private void loadDestinationList() {
 
+
         FirebaseFirestore db=FirebaseFirestore.getInstance();
         showProgress();
-        db.collection(DbPaths.COLLECTION_DESTINATIONS)
+        listenerRegistration=db.collection(DbPaths.COLLECTION_DESTINATIONS)
                 .whereEqualTo("destType",getDestinationType())
                 .orderBy("name")
-                .addSnapshotListener(this, new EventListener<QuerySnapshot>() {
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot querySnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
 
@@ -168,6 +180,7 @@ public class DestinationActivity extends ConnectivityActivity implements Recycle
     }
 
     protected void setData(List<Destination> data){
+
 
         if(adapter==null){
             adapter=new DestinationAdapter(data,this);
@@ -201,10 +214,6 @@ public class DestinationActivity extends ConnectivityActivity implements Recycle
     protected int getDestinationType(){
 
         return Destination.TYPE_CLIENT;
-    }
-
-    public void onShowEditDestinationDialog(Destination destination){
-
     }
 
     public void onShowNewDestinationDialog(){

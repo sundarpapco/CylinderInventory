@@ -101,8 +101,6 @@ public class CreateAllotmentActivity extends TransactionActivity {
 
     protected void onCreateAllotment(){
 
-        // TODO: 25-02-2019 Create the allotment here
-
         String successMsg="Alloment created successfully";
         String progressMsg="Creating allotment";
         String failedMsg="Error creating allotment";

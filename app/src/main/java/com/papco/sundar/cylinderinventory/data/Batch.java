@@ -16,6 +16,7 @@ public class Batch {
     public static final int TYPE_REPAIR=5;
     public static final int TYPE_RCI=6;
     @Exclude private static final SimpleDateFormat format=new SimpleDateFormat("dd/MM/yyyy, hh:mm a");
+    @Exclude private static final SimpleDateFormat dateFormat=new SimpleDateFormat("dd/MM/yyyy");
 
 
     private long id;
@@ -95,6 +96,11 @@ public class Batch {
     }
 
     @Exclude
+    public String getStringDate(){
+        return dateFormat.format(timestamp);
+    }
+
+    @Exclude
     public void setCurrentTime(){
 
         timestamp=Calendar.getInstance().getTimeInMillis();
@@ -135,4 +141,41 @@ public class Batch {
         batchNumber=batchNumber+Long.toString(id);
         return batchNumber;
     }
+
+    @Exclude
+    public String getStringBatchType(){
+
+        String batchType="";
+        switch (type){
+
+            case TYPE_ECR:
+                batchType="Empty cylinder return";
+                break;
+
+            case TYPE_FCI:
+                batchType="Full cylinder inward";
+                break;
+
+            case TYPE_INVOICE:
+                batchType="Invoice";
+                break;
+
+            case TYPE_REFILL:
+                batchType="Sent for refill";
+                break;
+
+            case TYPE_REPAIR:
+                batchType="sent for repair";
+                break;
+
+            case TYPE_RCI:
+                batchType="Repaired cylinder inward";
+                break;
+
+        }
+
+        return batchType;
+    }
+
+
 }

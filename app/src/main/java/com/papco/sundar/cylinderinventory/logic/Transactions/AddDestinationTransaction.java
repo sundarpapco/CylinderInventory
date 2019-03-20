@@ -39,6 +39,7 @@ public class AddDestinationTransaction extends BaseTransaction {
         }
 
         destination.setId(lastId+1);
+        destination.setEditable(true);
         DocumentReference newDestinationRef=db.collection(DbPaths.COLLECTION_DESTINATIONS).document(destination.getStringId());
         transaction.set(newDestinationRef,destination);
 

@@ -115,7 +115,7 @@ public class TransactionRunnerService extends Service {
         isRunning = true;
 
         successMessage=intent.getExtras().getString(KEY_SUCCESS_MESSAGE,"Transaction success");
-        failureMessage=intent.getExtras().getString(KEY_FAILURE_MESSAGE,"Transacion failed. Check intener conection");
+        failureMessage=intent.getExtras().getString(KEY_FAILURE_MESSAGE,"Transaction failed. Check intener conection");
         progressMessage=intent.getExtras().getString(KEY_PROGRESS_MESSAGE,"Running Transaction");
         requestCode=intent.getExtras().getInt(KEY_REQUEST_CODE,-1);
         showNotification(); //This will make the service foreground

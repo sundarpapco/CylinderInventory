@@ -15,12 +15,6 @@ public class RefillsActivity extends DestinationActivity {
         return "Refill stations";
     }
 
-    @Override
-    public void onShowEditDestinationDialog(Destination destination) {
-        /*AddDestinationFragment fragment=new AddRefillsDialog();
-        fragment.setArguments(AddDestinationFragment.getStartingArguments(true,destination));
-        fragment.show(getSupportFragmentManager(),"addRefillStation");*/
-    }
 
     @Override
     public void onShowNewDestinationDialog() {

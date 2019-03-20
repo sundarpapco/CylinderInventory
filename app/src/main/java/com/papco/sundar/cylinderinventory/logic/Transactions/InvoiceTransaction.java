@@ -57,6 +57,7 @@ public class InvoiceTransaction extends BaseTransaction {
         else {
             client = clientSnapshot.toObject(Destination.class);
             client.setCylinderCount(client.getCylinderCount()+prefetchCylinders.size());
+            client.setEditable(false);
         }
         //endregion checking client and loading ----------------------------------
 

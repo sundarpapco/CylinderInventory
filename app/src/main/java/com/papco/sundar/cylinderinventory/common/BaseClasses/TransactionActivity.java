@@ -59,7 +59,7 @@ public class TransactionActivity extends ConnectivityActivity implements Transac
         }
 
         Intent startIntent = TransactionRunnerService.getStartingIntent(
-                this, successMsg,"Running Transaction", failureMsg,requestCode);
+                this, successMsg,progressMsg, failureMsg,requestCode);
 
         this.startService(startIntent);
 

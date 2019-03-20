@@ -1,4 +1,4 @@
-package com.papco.sundar.cylinderinventory.screens.mainscreen;
+package com.papco.sundar.cylinderinventory.screens.destinations.destinationDetail.historyList;
 
 import android.util.Log;
 
@@ -8,12 +8,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class BatchFeedScrollListener extends RecyclerView.OnScrollListener {
+public class DestinationHistoryScrollListener extends RecyclerView.OnScrollListener {
 
     public static final String TAG="SUNDAR";
-
-    public static final int PAGE_SIZE=25;
-    private static final int PREFETCH_DISTANCE=10;
 
     private boolean isLoading=false;
     private boolean allLoadingComplete=false;
@@ -21,7 +18,7 @@ public class BatchFeedScrollListener extends RecyclerView.OnScrollListener {
     private LoadMoreListener callback;
 
 
-    public BatchFeedScrollListener(@NonNull LinearLayoutManager layoutManager, @NonNull LoadMoreListener callback) {
+    public DestinationHistoryScrollListener (@NonNull LinearLayoutManager layoutManager, @NonNull LoadMoreListener callback) {
         this.layoutManager = layoutManager;
         this.callback = callback;
     }
@@ -36,7 +33,7 @@ public class BatchFeedScrollListener extends RecyclerView.OnScrollListener {
 
         if(!allLoadingComplete &&
                 !isLoading &&
-                layoutManager.getItemCount()-layoutManager.findLastVisibleItemPosition()<=PREFETCH_DISTANCE){
+                layoutManager.getItemCount()-layoutManager.findLastVisibleItemPosition()<=DestinationHistoryData.PREFETCH_DISTANCE){
 
             //trigger the load here
             log("Triggering the load");
@@ -64,4 +61,6 @@ public class BatchFeedScrollListener extends RecyclerView.OnScrollListener {
 
         Log.d(TAG, msg);
     }
+
+
 }

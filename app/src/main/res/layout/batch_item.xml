@@ -23,6 +23,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="2dp"
+        android:maxLines="1"
         android:ellipsize="end"
         android:fontFamily="@font/segouei"
         android:text="Invoice"
@@ -40,6 +41,7 @@
         android:fontFamily="@font/segouei"
         android:text="19/02/2019, 05:48 PM"
         android:textSize="10dp"
+        android:maxLines="1"
         app:layout_constraintBaseline_toBaselineOf="@+id/batch_item_title"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -53,6 +55,7 @@
         android:ellipsize="end"
         android:fontFamily="sans-serif-condensed"
         android:text="Sri Vidhya Hospitals"
+        android:maxLines="1"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -67,6 +70,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
         android:ellipsize="end"
+        android:maxLines="1"
         android:text="8 Cylinders"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
