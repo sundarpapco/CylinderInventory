@@ -3,10 +3,13 @@ package com.papco.sundar.cylinderinventory.common;
 import android.content.Context;
 import android.graphics.Rect;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
 public class SpacingDecoration extends RecyclerView.ItemDecoration {
+
 
     public static final int HORIZONTAL = 1;
     public static final int VERTICAL = 2;
@@ -14,6 +17,7 @@ public class SpacingDecoration extends RecyclerView.ItemDecoration {
     Context context;
     int topSpacing, bottomSpacing, itemSpacing;
     int orientation;
+    int adapterPositionOfView,totalItemsInAdapter;
 
     public SpacingDecoration(Context context, int orientation, float topSpacingDp, float itemSpacingDp, float bottomSpacingDp) {
         this.context = context;
@@ -29,21 +33,44 @@ public class SpacingDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
 
-        if (parent.getChildAdapterPosition(view) == 0) {
-            if (orientation == HORIZONTAL)
+        adapterPositionOfView=parent.getChildAdapterPosition(view);
+        totalItemsInAdapter=parent.getAdapter().getItemCount();
+
+
+        //checking for first item in list
+        if (adapterPositionOfView == 0) {
+
+            if (orientation == HORIZONTAL) {
                 outRect.left = (int) topSpacing;
-            else
+            }else {
                 outRect.top = (int) topSpacing;
+            }
+
+            return;
         }
 
+        //checking for last time
+        if(adapterPositionOfView==totalItemsInAdapter-1){
 
-        int spacing=parent.getChildAdapterPosition(view)==state.getItemCount()-1?bottomSpacing:itemSpacing;
+            if(orientation==HORIZONTAL) {
+                outRect.right = (int) bottomSpacing;
+                outRect.left=(int)itemSpacing;
 
-        if (orientation == HORIZONTAL)
-            outRect.right = spacing;
-        else
-            outRect.bottom = spacing;
+            }else {
+                outRect.top=(int)itemSpacing;
+                outRect.bottom = (int)bottomSpacing;
+            }
 
+            return;
+        }
+
+        //intermediate items
+        if(orientation==HORIZONTAL) {
+            outRect.right = (int) itemSpacing;
+
+        }else {
+            outRect.top=(int)itemSpacing;
+        }
 
     }
 

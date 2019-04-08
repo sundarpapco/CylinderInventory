@@ -6,7 +6,8 @@
     <color name="colorAccent">#8E0DF1</color>
 
     <color name="borderGrey">#707070</color>
-    <color name="tabBackground">#E0E0E0</color>
+    <color name="tabGrey">#E0E0E0</color>
+    <color name="mildGrey">#F3F3F3</color>
     <color name="progressOverlay">#74000000</color>
     <color name="ConnectionFailRed">#FF3B3B</color>
 
@@ -23,6 +24,11 @@
     <color name="ecr_mild_blue">#A6D4E7</color>
     <color name="rep_mild_red">#FF8A8A</color>
     <color name="ref_mild_pink">#B9B0BE</color>
+
+    <color name="allotment_waiting_for_pickup">@android:color/holo_red_dark</color>
+    <color name="allotment_waiting_for_approval">#6BBFE6</color>
+    <color name="allotment_picked_up">#FF9B20</color>
+    <color name="allotment_ready_for_invoice">#B6E670</color>
 
 
 

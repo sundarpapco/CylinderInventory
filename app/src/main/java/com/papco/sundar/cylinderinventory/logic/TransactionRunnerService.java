@@ -7,28 +7,30 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import androidx.annotation.NonNull;
+
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import android.util.Log;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.api.LogDescriptor;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.screens.mainscreen.MainActivity;
 
-import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class TransactionRunnerService extends Service {
+
+    private static final String ACTION_START_SERVICE = "com.papco.sundar.cylinderinventory.starttransactionservice";
+    private static final String ACTION_STOP_SERVICE = "com.papco.sundar.cylinderinventory.stoptransactionservice";
+    private static final String KEY_SUCCESS_MESSAGE="success_message";
+    private static final String KEY_FAILURE_MESSAGE="failure_message";
+    private static final String KEY_PROGRESS_MESSAGE="progress_message";
+    private static final String KEY_REQUEST_CODE="request_code";
+
 
     public static Intent getStartingIntent(Context context,
                                            String successMessage,
@@ -55,12 +57,6 @@ public class TransactionRunnerService extends Service {
         return intent;
     }
 
-    private static final String ACTION_START_SERVICE = "com.papco.sundar.cylinderinventory.starttransactionservice";
-    private static final String ACTION_STOP_SERVICE = "com.papco.sundar.cylinderinventory.stoptransactionservice";
-    private static final String KEY_SUCCESS_MESSAGE="success_message";
-    private static final String KEY_FAILURE_MESSAGE="failure_message";
-    private static final String KEY_PROGRESS_MESSAGE="progress_message";
-    private static final String KEY_REQUEST_CODE="request_code";
 
     //-------------------------- *** ----------------------------------
 
@@ -162,7 +158,7 @@ public class TransactionRunnerService extends Service {
                     }
                 }else {
 
-                    transaction.setPrefetchedDocuments(documentSnapshots);
+                    transaction.setPrefetchDocuments(documentSnapshots);
                     runTheTransaction();
                 }
             }
@@ -175,33 +171,30 @@ public class TransactionRunnerService extends Service {
     private void runTheTransaction(){
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.runTransaction(transaction).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
+        db.runTransaction(transaction).addOnCompleteListener(task -> {
 
-                if (task.isSuccessful()) {
+            if (task.isSuccessful()) {
 
-                    if (callback!=null)
-                        callback.onTransactionComplete(task,requestCode);
-                    else
-                        Msg.show(TransactionRunnerService.this,successMessage);
+                if (callback!=null)
+                    callback.onTransactionComplete(task,requestCode);
+                else
+                    Msg.show(TransactionRunnerService.this,successMessage);
 
+                stopServiceSuccess();
+
+            } else {
+
+                if (callback!=null) {
+                    callback.onTransactionComplete(task,requestCode);
                     stopServiceSuccess();
-
                 } else {
 
-                    if (callback!=null) {
-                        callback.onTransactionComplete(task,requestCode);
-                        stopServiceSuccess();
-                    } else {
-                        FirebaseFirestoreException exception=(FirebaseFirestoreException)task.getException();
-                        if(exception.getCode()==FirebaseFirestoreException.Code.CANCELLED) {
-                            Msg.show(TransactionRunnerService.this, exception.getMessage());
-                            stopServiceFailure(exception.getMessage());
-                        }else {
-                            Msg.show(TransactionRunnerService.this, failureMessage);
-                            stopServiceFailure(failureMessage);
-                        }
+                    if(task.getException()!=null) {
+                        Msg.show(TransactionRunnerService.this,task.getException().getMessage());
+                        stopServiceFailure(task.getException().getMessage());
+                    }else {
+                        Msg.show(TransactionRunnerService.this, failureMessage);
+                        stopServiceFailure(failureMessage);
                     }
                 }
             }

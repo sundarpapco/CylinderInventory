@@ -3,9 +3,11 @@ package com.papco.sundar.cylinderinventory.screens.operations.allotment;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,22 +16,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.ConnectivityActivity;
-import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.common.SpacingDecoration;
-import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
 import com.papco.sundar.cylinderinventory.data.Allotment;
 import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
-import com.papco.sundar.cylinderinventory.screens.operations.outward.Invoice.InvoiceOperationActivity;
+import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
+import com.papco.sundar.cylinderinventory.screens.operations.allotment.approve.ApproveAllotmentActivity;
+import com.papco.sundar.cylinderinventory.screens.operations.allotment.pickup.FillCylindersActivity;
+import com.papco.sundar.cylinderinventory.screens.operations.outward.Invoice.InvoiceActivity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AllotmentActivity extends ConnectivityActivity implements RecyclerListener<Allotment> {
@@ -37,8 +33,12 @@ public class AllotmentActivity extends ConnectivityActivity implements RecyclerL
 
     private RecyclerView recyclerView;
     private AllotmentAdapter adapter;
-    private ListenerRegistration listenerRegistration;
     private ProgressBar progressBar;
+    private AllotmentActivityVM viewModel;
+
+    private final String successMsg="Allotment deleted successfully";
+    private final String progressMsg="Deleting allotment";
+    private final String failureMsg="Allotment deletion failed. Try again";
 
 
     @Override
@@ -48,7 +48,14 @@ public class AllotmentActivity extends ConnectivityActivity implements RecyclerL
         linkViews();
         initViews();
         setupToolBar();
-
+        viewModel= ViewModelProviders.of(this).get(AllotmentActivityVM.class);
+        viewModel.getAllotmentList().observe(this, new Observer<List<Allotment>>() {
+            @Override
+            public void onChanged(List<Allotment> allotments) {
+                hideListProgressBar();
+                adapter.setData(allotments);
+            }
+        });
     }
 
     private void linkViews() {
@@ -63,6 +70,7 @@ public class AllotmentActivity extends ConnectivityActivity implements RecyclerL
         adapter=new AllotmentAdapter(this,this);
         recyclerView.addItemDecoration(new SpacingDecoration(this,SpacingDecoration.VERTICAL,0,16,26));
         recyclerView.setAdapter(adapter);
+        showListProgressBar();
 
         FloatingActionButton fab=findViewById(R.id.allotment_fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -75,12 +83,6 @@ public class AllotmentActivity extends ConnectivityActivity implements RecyclerL
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        loadAllotments();
-    }
-
     private void setupToolBar() {
 
         Toolbar toolbar=findViewById(R.id.toolbar);
@@ -89,37 +91,6 @@ public class AllotmentActivity extends ConnectivityActivity implements RecyclerL
         actionBar.setTitle("Allotments");
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
-
-    }
-
-    private void loadAllotments(){
-
-
-        progressBar.setVisibility(View.VISIBLE);
-        FirebaseFirestore db=FirebaseFirestore.getInstance();
-        if(listenerRegistration!=null)
-            listenerRegistration.remove();
-
-        listenerRegistration=db.collection(DbPaths.COLLECTION_ALLOTMENT)
-                .addSnapshotListener(this, new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@javax.annotation.Nullable QuerySnapshot querySnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
-
-                        progressBar.setVisibility(View.INVISIBLE);
-                        if(e!=null){
-                            Msg.show(AllotmentActivity.this,"Error connecting to server. Please check internet connection");
-                            return;
-                        }
-
-                        List<DocumentSnapshot> documentSnapshots=querySnapshot.getDocuments();
-                        List<Allotment> allotments=new ArrayList<>();
-                        for(DocumentSnapshot documentSnapshot:documentSnapshots){
-                            allotments.add(documentSnapshot.toObject(Allotment.class));
-                        }
-                        adapter.setData(allotments);
-                    }
-                });
-
 
     }
 
@@ -138,15 +109,22 @@ public class AllotmentActivity extends ConnectivityActivity implements RecyclerL
     @Override
     public void onRecyclerItemClicked(Allotment item, int position) {
 
-        if(item.getState()==Allotment.STATE_READY_FOR_INVOICE){
-
-            InvoiceOperationActivity.start(this,item);
-
-        }
 
         if(item.getState()==Allotment.STATE_ALLOTTED){
 
-            pickupAllotment(item);
+            ApproveAllotmentActivity.start(this,item);
+
+        }
+
+        if(item.getState()==Allotment.STATE_APPROVED || item.getState()==Allotment.STATE_PICKED_UP){
+
+            FillCylindersActivity.start(this,item);
+
+        }
+
+        if(item.getState()==Allotment.STATE_READY_FOR_INVOICE){
+
+            InvoiceActivity.start(this,item);
 
         }
 
@@ -155,26 +133,33 @@ public class AllotmentActivity extends ConnectivityActivity implements RecyclerL
     @Override
     public void onRecyclerItemLongClicked(final Allotment item, int position, View view) {
 
-        if(item.getState()!=Allotment.STATE_PICKED_UP)
+        if(TransactionRunnerService.isRunning())
             return;
 
         PopupMenu popupMenu=new PopupMenu(this,view);
-        popupMenu.getMenuInflater().inflate(R.menu.popup_menu_allotment,popupMenu.getMenu());
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
+        popupMenu.getMenuInflater().inflate(R.menu.mnu_delete,popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
 
-                if(menuItem.getItemId()==R.id.mnu_allotment_pickup){
+            if(menuItem.getItemId()==R.id.mnu_delete){
 
-                    pickupAllotment(item);
-                    return true;
-                }
-
-                return false;
+                deleteAllotment(item);
+                return true;
             }
+
+            return false;
         });
         popupMenu.show();
 
+    }
+
+    private void showListProgressBar(){
+        recyclerView.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideListProgressBar(){
+        recyclerView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     protected void onCreateNewAllotment(){
@@ -184,10 +169,13 @@ public class AllotmentActivity extends ConnectivityActivity implements RecyclerL
 
     }
 
-    protected void pickupAllotment(Allotment allotment){
+    // *************** Operations
 
-        FillCylindersActivity.start(this,allotment);
+    private void deleteAllotment(Allotment allotment){
+
+        DeleteAllotmentFragment deleteFragment=new DeleteAllotmentFragment();
+        deleteFragment.setArguments(DeleteAllotmentFragment.getStartingArgs(allotment.getId()));
+        deleteFragment.show(getSupportFragmentManager(),"deleteFragment");
 
     }
-
 }

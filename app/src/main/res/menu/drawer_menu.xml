@@ -7,6 +7,9 @@
         <item android:id="@+id/mnu_drawer_cylinders"
             android:title="Cylinders"/>
 
+        <item android:id="@+id/mnu_drawer_cylinder_types"
+            android:title="Cylinder Types"/>
+
         <item android:id="@+id/mnu_drawer_clients"
             android:title="Clients"/>
 

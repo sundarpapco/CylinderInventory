@@ -2,9 +2,13 @@ package com.papco.sundar.cylinderinventory.screens.operations.allotment;
 
 
 import android.content.Context;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.GradientDrawable;
+
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,13 +26,13 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
 
     private List<Allotment> data;
     private RecyclerListener<Allotment> callback;
-    private GradientDrawable round;
+    private Context context;
 
-    public AllotmentAdapter(Context context,@NonNull RecyclerListener<Allotment> callback) {
+    public AllotmentAdapter(Context context, @NonNull RecyclerListener<Allotment> callback) {
 
         this.data = new ArrayList<>();
         this.callback = callback;
-        round=(GradientDrawable)context.getResources().getDrawable(R.drawable.batch_item_round);
+        this.context = context;
 
     }
 
@@ -52,16 +56,15 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
         return data.size();
     }
 
-    public void setData(List<Allotment> data){
-        this.data=data;
-        Log.d("SUNDAR", "getItemCount: "+Integer.toString(this.data.size()));
+    public void setData(List<Allotment> data) {
+        this.data = data;
         notifyDataSetChanged();
     }
 
     class AllotmentVH extends RecyclerView.ViewHolder {
 
         private View colorView;
-        private TextView status, destination, cylinderCount,timeStamp;
+        private TextView status, destination, cylinderCount, timeStamp;
 
 
         public AllotmentVH(@NonNull final View itemView) {
@@ -70,20 +73,20 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
             status = itemView.findViewById(R.id.batch_item_title);
             destination = itemView.findViewById(R.id.batch_item_destination_name);
             cylinderCount = itemView.findViewById(R.id.batch_item_no_of_cylinders);
-            colorView=itemView.findViewById(R.id.view);
-            timeStamp=itemView.findViewById(R.id.batch_item_timestamp);
+            colorView = itemView.findViewById(R.id.view);
+            timeStamp = itemView.findViewById(R.id.batch_item_timestamp);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    callback.onRecyclerItemClicked(data.get(getAdapterPosition()),getAdapterPosition());
+                    callback.onRecyclerItemClicked(data.get(getAdapterPosition()), getAdapterPosition());
                 }
             });
 
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    callback.onRecyclerItemLongClicked(data.get(getAdapterPosition()),getAdapterPosition(),itemView);
+                    callback.onRecyclerItemLongClicked(data.get(getAdapterPosition()), getAdapterPosition(), itemView);
                     return true;
                 }
             });
@@ -91,27 +94,35 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
 
         public void bind() {
 
+            int roundColor = 1;
             Allotment allotment = data.get(getAdapterPosition());
             switch (allotment.getState()) {
 
                 case Allotment.STATE_ALLOTTED:
-                    status.setText("Alloted");
-                    colorView.setBackgroundResource(R.drawable.round_blue);
+                    status.setText("Waiting for approval");
+                    roundColor = ContextCompat.getColor(context, R.color.allotment_waiting_for_approval);
                     break;
+
+                case Allotment.STATE_APPROVED:
+                    status.setText("Waiting for pickup");
+                    roundColor = ContextCompat.getColor(context, R.color.allotment_waiting_for_pickup);
+                    break;
+
 
                 case Allotment.STATE_PICKED_UP:
                     status.setText("Picked up");
-                    colorView.setBackgroundResource(R.drawable.round_orange);
+                    roundColor= ContextCompat.getColor(context,R.color.allotment_picked_up);
                     break;
 
                 case Allotment.STATE_READY_FOR_INVOICE:
                     status.setText("Ready for Invoice");
-                    colorView.setBackgroundResource(R.drawable.batch_item_round);
+                    roundColor= ContextCompat.getColor(context,R.color.allotment_ready_for_invoice);
                     break;
             }
+            colorView.getBackground().setColorFilter(roundColor, PorterDuff.Mode.MULTIPLY);
             timeStamp.setText(allotment.getStringTimeStamp());
             destination.setText(allotment.getClientName());
-            cylinderCount.setText(Integer.toString(allotment.getNumberOfCylinders())+ " Cylinders");
+            cylinderCount.setText(Integer.toString(allotment.getNumberOfCylinders()) + " Cylinders");
         }
     }
 }

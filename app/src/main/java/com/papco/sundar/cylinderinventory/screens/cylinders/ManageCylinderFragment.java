@@ -50,7 +50,8 @@ public class ManageCylinderFragment extends TransactionFragment {
     private FirebaseFirestore db;
     private ListenerRegistration activeListener;
 
-    private TextView cylinderNo, purchaseDate, supplier, remarks, refills, repairs, location, status;
+    private TextView cylinderNo, purchaseDate, supplier, remarks, refills, repairs, location, status, cylinderType;
+    private TextView lastTransaction;
 
     private Button btnMarkRepair, btnDelete;
 
@@ -110,6 +111,8 @@ public class ManageCylinderFragment extends TransactionFragment {
         repairs = view.findViewById(R.id.mng_cyl_repairs);
         location = view.findViewById(R.id.mng_cyl_location);
         status = view.findViewById(R.id.mng_cyl_status);
+        cylinderType=view.findViewById(R.id.mng_cyl_cylinder_type);
+        lastTransaction=view.findViewById(R.id.mng_cyl_last_transaction);
 
     }
 
@@ -318,6 +321,8 @@ public class ManageCylinderFragment extends TransactionFragment {
         refills.setText(Integer.toString(cylinder.getRefillCount()));
         repairs.setText(Integer.toString(cylinder.getDamageCount()));
         location.setText(cylinder.getLocationName());
+        cylinderType.setText(cylinder.getCylinderTypeName());
+        lastTransaction.setText(cylinder.getStringLastTransaction());
 
         if (cylinder.getLocationId() == Destination.TYPE_GRAVEYARD) {
             status.setText("DEACTIVATED");

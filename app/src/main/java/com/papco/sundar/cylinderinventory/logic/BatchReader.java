@@ -71,7 +71,7 @@ public class BatchReader {
     }
 
 
-    interface BatchReaderListener {
+    public interface BatchReaderListener {
 
         void onBatchReadComplete(List<DocumentSnapshot> documentSnapshots);
 

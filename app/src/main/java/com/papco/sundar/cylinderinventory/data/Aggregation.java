@@ -9,6 +9,7 @@ public class Aggregation {
     public static final int TYPE_DESTINATION=2;
     public static final int TYPE_ALLOTMENT=3;
     public static final int TYPE_BATCH=4;
+    public static final int TYPE_CYLINDER_TYPES=5;
 
     private int count;
     private int type;

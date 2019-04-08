@@ -18,12 +18,10 @@ import java.util.Calendar;
 
 public class CreateAllotmentTransaction extends BaseTransaction {
 
-    private int noOfCylinders;
-    private Destination destination;
+    private Allotment allotment;
 
-    public CreateAllotmentTransaction(int noOfCylinders, Destination destination) {
-        this.noOfCylinders = noOfCylinders;
-        this.destination = destination;
+    public CreateAllotmentTransaction(@NonNull Allotment newAllotment) {
+        allotment=newAllotment;
     }
 
 
@@ -32,12 +30,11 @@ public class CreateAllotmentTransaction extends BaseTransaction {
     public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
 
         Aggregation allotmentAgg;
-        Allotment allotment;
         Destination client;
 
         FirebaseFirestore db=FirebaseFirestore.getInstance();
         DocumentReference counterRef=db.document(DbPaths.COUNT_ALLOTMENT);
-        DocumentReference clientRef=db.collection(DbPaths.COLLECTION_DESTINATIONS).document(destination.getStringId());
+        DocumentReference clientRef=db.collection(DbPaths.COLLECTION_DESTINATIONS).document(Integer.toString(allotment.getClientId()));
 
         DocumentSnapshot counterDoc=transaction.get(counterRef);
         DocumentSnapshot clientDoc=transaction.get(clientRef);
@@ -66,12 +63,7 @@ public class CreateAllotmentTransaction extends BaseTransaction {
         }
 
 
-        allotment=new Allotment();
         allotment.setId(allotmentAgg.getCount());
-        allotment.setState(Allotment.STATE_ALLOTTED);
-        allotment.setNumberOfCylinders(noOfCylinders);
-        allotment.setClientName(destination.getName());
-        allotment.setClientId(destination.getId());
         allotment.setTimeStamp(Calendar.getInstance().getTimeInMillis());
 
         DocumentReference newAllotmentRef=db.collection(DbPaths.COLLECTION_ALLOTMENT)

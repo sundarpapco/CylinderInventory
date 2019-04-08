@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="48dp">
+
+    <TextView
+        android:id="@+id/allotment_list_item_type_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="O2 97Kg"
+        android:textColor="@android:color/black"
+        android:textSize="19sp"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_gravity="center_vertical"/>
+
+    <TextView
+        android:id="@+id/allotment_list_item_cyl_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="6"
+        android:textColor="@color/colorAccent"
+        android:textSize="19sp"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_gravity="center_vertical|end"/>
+
+
+
+</LinearLayout>

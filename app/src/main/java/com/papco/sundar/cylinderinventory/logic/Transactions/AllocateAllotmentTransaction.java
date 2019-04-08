@@ -2,7 +2,6 @@ package com.papco.sundar.cylinderinventory.logic.Transactions;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -16,7 +15,6 @@ import com.papco.sundar.cylinderinventory.data.Cylinder;
 import com.papco.sundar.cylinderinventory.data.Destination;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class AllocateAllotmentTransaction extends BaseTransaction {
@@ -36,7 +34,7 @@ public class AllocateAllotmentTransaction extends BaseTransaction {
         DocumentReference allotmentRef=db.collection(DbPaths.COLLECTION_ALLOTMENT).document(Integer.toString(allocationId));
         Allotment allotment;
 
-        cylinders=getPrefetchedDocuments();
+        cylinders= getPrefetchDocuments();
         if(cylinders==null)
             throw new FirebaseFirestoreException("No prefetch found",
                     FirebaseFirestoreException.Code.CANCELLED);

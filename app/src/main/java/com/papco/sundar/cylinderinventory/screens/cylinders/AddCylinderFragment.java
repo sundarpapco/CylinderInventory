@@ -11,6 +11,8 @@ import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.textfield.TextInputEditText;
+
+import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -19,6 +21,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -30,24 +33,32 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.MetadataChanges;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.TransactionFragment;
 import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
 import com.papco.sundar.cylinderinventory.common.Msg;
+import com.papco.sundar.cylinderinventory.data.CylinderType;
 import com.papco.sundar.cylinderinventory.logic.Transactions.AddCylindersTransaction;
 import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddCylinderFragment extends TransactionFragment {
 
     private FirebaseFirestore db;
     private TextView infoView;
-    private ListenerRegistration listener;
+    private ListenerRegistration listener,cylinderTypesListener;
     private TextInputEditText supplierField,cylinderCountField,remarksField;
-    private int lastCylinderNumber=-1;
+    private int lastCylinderNumber=0;
     private ProgressBar progressBar;
     private Button btnSave;
+    private AppCompatSpinner spinner;
+    private List<CylinderType> cylinderTypes=new ArrayList<>();
+    private ArrayAdapter<CylinderType> spinnerAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -91,6 +102,7 @@ public class AddCylinderFragment extends TransactionFragment {
         remarksField=view.findViewById(R.id.add_cyl_remarks);
         progressBar=view.findViewById(R.id.add_cyl_progressbar);
         btnSave=view.findViewById(R.id.add_cyl_btn_add);
+        spinner=view.findViewById(R.id.add_cyl_cyliner_type_spinner);
 
     }
 
@@ -119,6 +131,62 @@ public class AddCylinderFragment extends TransactionFragment {
 
             }
         });
+
+        initSpinner();
+
+    }
+
+    private void initSpinner(){
+
+        CylinderType defaultType=new CylinderType();
+        defaultType.setName("Default");
+        defaultType.setNoOfCylinders(0);
+        cylinderTypes.add(defaultType);
+
+        spinnerAdapter=new ArrayAdapter<>(getActivity(),
+                R.layout.spinner_item,
+                R.id.spinner_item_text,
+                cylinderTypes);
+
+        spinner.setAdapter(spinnerAdapter);
+        loadCylinderTypesList();
+    }
+
+    private void loadCylinderTypesList(){
+
+        if(cylinderTypesListener!=null)
+            cylinderTypesListener.remove();
+
+        cylinderTypesListener=db.collection(DbPaths.COLLECTION_CYLINDER_TYPES)
+                .orderBy("name")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@javax.annotation.Nullable QuerySnapshot querySnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                        if(e!=null){
+                            Msg.show(getActivity(),"Error connecting to server. Please check internet connection");
+                            return;
+                        }
+
+                        List<CylinderType> types=new ArrayList<>();
+                        for(DocumentSnapshot documentSnapshot:querySnapshot.getDocuments()){
+                            types.add(documentSnapshot.toObject(CylinderType.class));
+                        }
+
+                        if(types.size()==0){
+
+                            CylinderType defaultType=new CylinderType();
+                            defaultType.setNoOfCylinders(0);
+                            defaultType.setName("Default");
+                            spinnerAdapter.clear();
+                            spinnerAdapter.add(defaultType);
+                            return;
+                        }
+
+                        spinnerAdapter.clear();
+                        spinnerAdapter.addAll(types);
+                    }
+                });
+
     }
 
     private void confirmAdd(){
@@ -222,13 +290,18 @@ public class AddCylinderFragment extends TransactionFragment {
             return false;
         }
 
-        if(Integer.parseInt(cylinderCountField.getText().toString())>20){
-            Msg.show(requireContext(),"Maximum of 20 cylinders can be added at one time");
+        if(Integer.parseInt(cylinderCountField.getText().toString())>50){
+            Msg.show(requireContext(),"Maximum of 50 cylinders can be added at one time");
             return false;
         }
 
         if(Integer.parseInt(cylinderCountField.getText().toString())<=0){
             Msg.show(getActivity(),"Please enter valid number of cylinders");
+            return false;
+        }
+
+        if(((CylinderType)spinner.getSelectedItem()).getName().equals("Default")){
+            Msg.show(getActivity(),"A valid cylinder type is needed");
             return false;
         }
 
@@ -244,7 +317,8 @@ public class AddCylinderFragment extends TransactionFragment {
         int numberOfCylinders=Integer.parseInt(cylinderCountField.getText().toString().trim());
         String supplier=supplierField.getText().toString();
         String remarks=remarksField.getText().toString();
-        return new AddCylindersTransaction(numberOfCylinders,supplier,remarks);
+        CylinderType cylinderType=(CylinderType)spinner.getSelectedItem();
+        return new AddCylindersTransaction(numberOfCylinders,supplier,remarks,cylinderType.getName());
 
     }
 
@@ -278,6 +352,8 @@ public class AddCylinderFragment extends TransactionFragment {
         super.onStop();
         listener.remove();
         listener=null;
+        if(cylinderTypesListener!=null)
+            cylinderTypesListener.remove();
     }
 
 }

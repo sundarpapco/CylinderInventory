@@ -19,6 +19,7 @@
         android:elevation="6dp"
         app:titleTextColor="@color/borderGrey" />
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/allotment_recycler"
         android:layout_width="match_parent"

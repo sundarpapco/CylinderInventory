@@ -4,19 +4,22 @@ import com.google.common.base.CaseFormat;
 import com.google.firebase.firestore.Exclude;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 public class Batch {
 
-    public static final int TYPE_FCI=1;
-    public static final int TYPE_REFILL=2;
-    public static final int TYPE_INVOICE=3;
-    public static final int TYPE_ECR=4;
-    public static final int TYPE_REPAIR=5;
-    public static final int TYPE_RCI=6;
-    @Exclude private static final SimpleDateFormat format=new SimpleDateFormat("dd/MM/yyyy, hh:mm a");
-    @Exclude private static final SimpleDateFormat dateFormat=new SimpleDateFormat("dd/MM/yyyy");
+    public static final int TYPE_FCI = 1;
+    public static final int TYPE_REFILL = 2;
+    public static final int TYPE_INVOICE = 3;
+    public static final int TYPE_ECR = 4;
+    public static final int TYPE_REPAIR = 5;
+    public static final int TYPE_RCI = 6;
+    @Exclude
+    private static final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy, hh:mm a");
+    @Exclude
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
 
     private long id;
@@ -26,6 +29,7 @@ public class Batch {
     private String destinationName;
     private int type;
     private List<Integer> cylinders;
+    private List<String> cylinderTypes;
 
 
     public long getId() {
@@ -84,97 +88,159 @@ public class Batch {
         this.cylinders = cylinders;
     }
 
+    public List<String> getCylinderTypes() {
+        return cylinderTypes;
+    }
+
+    public void setCylinderTypes(List<String> cylinderTypes) {
+        this.cylinderTypes = cylinderTypes;
+    }
 
     @Exclude
-    public String getStringId(){
+    public String getStringId() {
         return Long.toString(id);
     }
 
     @Exclude
-    public String getStringTimeStamp(){
+    public String getStringTimeStamp() {
         return format.format(timestamp);
     }
 
     @Exclude
-    public String getStringDate(){
+    public String getStringDate() {
         return dateFormat.format(timestamp);
     }
 
     @Exclude
-    public void setCurrentTime(){
+    public String getBatchNumber() {
 
-        timestamp=Calendar.getInstance().getTimeInMillis();
-    }
-
-    @Exclude
-    public String getBatchNumber(){
-
-        String batchNumber="";
-        switch (type){
+        String batchNumber = "";
+        switch (type) {
 
             case TYPE_ECR:
-                batchNumber="ecr-";
+                batchNumber = "ecr-";
                 break;
 
             case TYPE_FCI:
-                batchNumber="fci-";
+                batchNumber = "fci-";
                 break;
 
             case TYPE_INVOICE:
-                batchNumber="inv-";
+                batchNumber = "inv-";
                 break;
 
             case TYPE_REFILL:
-                batchNumber="ref-";
+                batchNumber = "ref-";
                 break;
 
             case TYPE_REPAIR:
-                batchNumber="rci-";
+                batchNumber = "rci-";
                 break;
 
             case TYPE_RCI:
-                batchNumber="rep-";
+                batchNumber = "rep-";
                 break;
 
         }
 
-        batchNumber=batchNumber+Long.toString(id);
+        batchNumber = batchNumber + Long.toString(id);
         return batchNumber;
     }
 
     @Exclude
-    public String getStringBatchType(){
+    public String getStringBatchType() {
 
-        String batchType="";
-        switch (type){
+        String batchType = "";
+        switch (type) {
 
             case TYPE_ECR:
-                batchType="Empty cylinder return";
+                batchType = "Empty cylinder return";
                 break;
 
             case TYPE_FCI:
-                batchType="Full cylinder inward";
+                batchType = "Full cylinder inward";
                 break;
 
             case TYPE_INVOICE:
-                batchType="Invoice";
+                batchType = "Invoice";
                 break;
 
             case TYPE_REFILL:
-                batchType="Sent for refill";
+                batchType = "Sent for refill";
                 break;
 
             case TYPE_REPAIR:
-                batchType="sent for repair";
+                batchType = "sent for repair";
                 break;
 
             case TYPE_RCI:
-                batchType="Repaired cylinder inward";
+                batchType = "Repaired cylinder inward";
                 break;
 
         }
 
         return batchType;
+    }
+
+    @Exclude
+    public List<List<Cylinder>> getTypedMasterList() {
+
+        if (cylinders == null || cylinderTypes == null)
+            return null;
+
+        if (cylinders.size() == 0 || cylinderTypes.size() == 0)
+            return null;
+
+        List<List<Cylinder>> masterList = new ArrayList<>();
+        List<Cylinder> monoList = new ArrayList<>();
+        String currentCylinderType = "";
+        String cylinderType;
+        Cylinder cylinder;
+
+        for (int i = 0; i < cylinders.size(); i++) {
+
+            cylinderType = cylinderTypes.get(i);
+            if (!currentCylinderType.equals(cylinderType)) {
+                if (monoList.size() > 0)
+                    masterList.add(monoList);
+                monoList = new ArrayList<>();
+                currentCylinderType=cylinderType;
+            }
+
+            cylinder = new Cylinder();
+            cylinder.setCylinderNo(cylinders.get(i));
+            cylinder.setCylinderTypeName(cylinderType);
+            monoList.add(cylinder);
+
+        }
+
+        if(monoList.size()>0)
+            masterList.add(monoList);
+
+        if(masterList.size()>0)
+            return masterList;
+        else
+            return null;
+    }
+
+    @Exclude
+    public void setCylindersAndTypes(List<List<Cylinder>> masterList){
+
+        if(masterList==null || masterList.size()==0){
+            cylinders=null;
+            cylinderTypes=null;
+        }
+
+        cylinders=new ArrayList<>();
+        cylinderTypes=new ArrayList<>();
+
+        for(List<Cylinder> monoList:masterList){
+            for(Cylinder cylinder:monoList){
+                cylinders.add(cylinder.getCylinderNo());
+                cylinderTypes.add(cylinder.getCylinderTypeName());
+            }
+        }
+
     }
 
 

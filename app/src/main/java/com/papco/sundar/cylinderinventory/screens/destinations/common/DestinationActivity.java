@@ -1,21 +1,11 @@
 package com.papco.sundar.cylinderinventory.screens.destinations.common;
 
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -29,11 +19,17 @@ import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
 import com.papco.sundar.cylinderinventory.data.Destination;
 import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
-import com.papco.sundar.cylinderinventory.screens.destinations.clients.ClientsActivity;
 import com.papco.sundar.cylinderinventory.screens.destinations.destinationDetail.DestinationDetailActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class DestinationActivity extends ConnectivityActivity implements RecyclerListener<Destination> {
 
@@ -221,9 +217,4 @@ public class DestinationActivity extends ConnectivityActivity implements Recycle
 
     }
 
-    protected void showMessage(String msg){
-
-        Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
-
-    }
 }

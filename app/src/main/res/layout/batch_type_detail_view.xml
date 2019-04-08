@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="13dp">
+
+    <TextView
+        android:id="@+id/batch_detail_view_cylinder_type_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="O2 97 Kg"
+        android:textSize="18dp"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_marginStart="16dp"
+        android:textColor="@android:color/black"/>
+    <TextView
+        android:id="@+id/batch_detail_view_cylinder_quantity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="7 CYlinders"
+        android:textSize="12dp"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_marginStart="16dp"
+        android:textColor="@android:color/black"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/batch_detail_view_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="2dp"/>
+
+</LinearLayout>

@@ -27,63 +27,93 @@ public class MarkDamageTransaction extends BaseTransaction {
     @Override
     public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
 
-        FirebaseFirestore db=FirebaseFirestore.getInstance();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        DocumentReference cylinderRef=db.collection(DbPaths.COLLECTION_CYLINDERS).document(Integer.toString(cylinderNumber));
-        DocumentReference damageCounterRef=db.document(DbPaths.COUNT_CYLINDERS_DAMAGED);
-        DocumentReference aggRef;
+        DocumentReference cylinderRef = db.collection(DbPaths.COLLECTION_CYLINDERS).document(Integer.toString(cylinderNumber));
+        DocumentReference globalDamageCounterRef = db.document(DbPaths.COUNT_CYLINDERS_DAMAGED);
+        DocumentReference globalCounterToReduce;
+        DocumentReference typeDamageCounterRef;
+        DocumentReference typeCounterToReduceRef;
 
         Cylinder cylinder;
         Aggregation warehouseAgg;
         Aggregation damageAgg;
+        Aggregation typeCounterToReduce;
+        Aggregation typeDamagedCounter;
 
 
         //read the cylinder document first;
-        DocumentSnapshot cylinderDoc=transaction.get(cylinderRef);
+        DocumentSnapshot cylinderDoc = transaction.get(cylinderRef);
 
         //if the cylinder document was not found, throw exception
-        if(!cylinderDoc.exists())
-            throw new FirebaseFirestoreException("Cylinder document not found",FirebaseFirestoreException.Code.CANCELLED);
+        if (!cylinderDoc.exists())
+            throw new FirebaseFirestoreException("Cylinder not found", FirebaseFirestoreException.Code.CANCELLED);
         else
-            cylinder=cylinderDoc.toObject(Cylinder.class);
+            cylinder = cylinderDoc.toObject(Cylinder.class);
 
-        if(cylinder.getLocationId()!= Destination.TYPE_WAREHOUSE)
-            throw new FirebaseFirestoreException("Cylinder not in warehouse. Try after getting it to warehouse",FirebaseFirestoreException.Code.CANCELLED);
-
-        if(cylinder.isEmpty())
-            aggRef=db.document(DbPaths.COUNT_CYLINDERS_EMPTY);
-        else
-            aggRef=db.document(DbPaths.COUNT_CYLINDERS_FULL);
+        if (cylinder.getLocationId() != Destination.TYPE_WAREHOUSE)
+            throw new FirebaseFirestoreException("Cylinder not in warehouse. Try after getting it to warehouse", FirebaseFirestoreException.Code.CANCELLED);
 
 
-        DocumentSnapshot aggDoc=transaction.get(aggRef);
-        DocumentSnapshot damageCounterDoc=transaction.get(damageCounterRef);
+        typeDamageCounterRef = db.document(DbPaths.getAggregationForType(cylinder.getCylinderTypeName(), DbPaths.AggregationType.DAMAGED));
+        if (cylinder.isEmpty()) {
+            globalCounterToReduce = db.document(DbPaths.COUNT_CYLINDERS_EMPTY);
+            typeCounterToReduceRef = db.document(DbPaths.getAggregationForType(cylinder.getCylinderTypeName(), DbPaths.AggregationType.EMPTY));
+        } else {
+            globalCounterToReduce = db.document(DbPaths.COUNT_CYLINDERS_FULL);
+            typeCounterToReduceRef = db.document(DbPaths.getAggregationForType(cylinder.getCylinderTypeName(), DbPaths.AggregationType.FULL));
+        }
 
-        if(!aggDoc.exists()) {
+        DocumentSnapshot aggDoc = transaction.get(globalCounterToReduce);
+        DocumentSnapshot damageCounterDoc = transaction.get(globalDamageCounterRef);
+        DocumentSnapshot typeDamageCounterDocument = transaction.get(typeDamageCounterRef);
+        DocumentSnapshot typeCounterToReduceDocument = transaction.get(typeCounterToReduceRef);
+
+        if (!aggDoc.exists()) {
             warehouseAgg = new Aggregation();
             warehouseAgg.setType(Aggregation.TYPE_CYLINDERS);
             warehouseAgg.setCount(0);
-        }else {
+        } else {
             warehouseAgg = aggDoc.toObject(Aggregation.class);
-            warehouseAgg.setCount(warehouseAgg.getCount()-1);
+            warehouseAgg.setCount(warehouseAgg.getCount() - 1);
         }
 
-        if(!damageCounterDoc.exists()){
-            damageAgg=new Aggregation();
+        if (!damageCounterDoc.exists()) {
+            damageAgg = new Aggregation();
             damageAgg.setType(Aggregation.TYPE_CYLINDERS);
             damageAgg.setCount(1);
-        }else{
-            damageAgg=damageCounterDoc.toObject(Aggregation.class);
-            damageAgg.setCount(damageAgg.getCount()+1);
+        } else {
+            damageAgg = damageCounterDoc.toObject(Aggregation.class);
+            damageAgg.setCount(damageAgg.getCount() + 1);
         }
-        
+
+        if (typeCounterToReduceDocument.exists()) {
+            typeCounterToReduce = typeCounterToReduceDocument.toObject(Aggregation.class);
+            typeCounterToReduce.setCount(typeCounterToReduce.getCount() - 1);
+        } else {
+            typeCounterToReduce = new Aggregation();
+            typeCounterToReduce.setCount(0);
+            typeCounterToReduce.setType(Aggregation.TYPE_CYLINDERS);
+        }
+
+        if (typeDamageCounterDocument.exists()) {
+            typeDamagedCounter = typeDamageCounterDocument.toObject(Aggregation.class);
+            typeDamagedCounter.setCount(typeDamagedCounter.getCount() + 1);
+        } else {
+            typeDamagedCounter = new Aggregation();
+            typeDamagedCounter.setCount(1);
+            typeDamagedCounter.setType(Aggregation.TYPE_CYLINDERS);
+        }
+
         cylinder.setDamaged(true);
         cylinder.setEmpty(true);
-        cylinder.setDamageCount(cylinder.getDamageCount()+1);
+        cylinder.setDamageCount(cylinder.getDamageCount() + 1);
 
-        transaction.set(cylinderRef,cylinder);
-        transaction.set(aggRef,warehouseAgg);
-        transaction.set(damageCounterRef,damageAgg);
+        transaction.set(cylinderRef, cylinder);
+        transaction.set(globalCounterToReduce, warehouseAgg);
+        transaction.set(globalDamageCounterRef, damageAgg);
+        transaction.set(typeDamageCounterRef,typeDamagedCounter);
+        transaction.set(typeCounterToReduceRef,typeCounterToReduce);
 
         return null;
     }

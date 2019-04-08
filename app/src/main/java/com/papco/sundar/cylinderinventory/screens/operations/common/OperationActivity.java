@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.google.firebase.firestore.ListenerRegistration;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.BaseClasses.ExitConfirmationDialog;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.TransactionActivity;
 import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 
@@ -59,6 +60,18 @@ public class OperationActivity extends TransactionActivity implements RecyclerLi
         }
 
         return false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(getCylinders().size()==0)
+            super.onBackPressed();
+        else{
+
+            ExitConfirmationDialog exitDialog=new ExitConfirmationDialog();
+            exitDialog.show(getSupportFragmentManager(),"exitDialog");
+
+        }
     }
 
     private void linkViews() {
@@ -180,7 +193,7 @@ public class OperationActivity extends TransactionActivity implements RecyclerLi
 
     protected int getNumberOfCylindersAdded(){
 
-        return Integer.parseInt(cylinderCount.getText().toString());
+        return getCylinders().size();
     }
 
     protected void loadDestinationName(String destName){

@@ -4,7 +4,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.Task;
@@ -20,6 +24,13 @@ public class TransactionActivity extends ConnectivityActivity implements Transac
     private TransactionRunnerService transactionService;
     private TransactionServiceConnection connection;
 
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(savedInstanceState!=null)
+            hasPendingWork=savedInstanceState.getBoolean("hasPendingWork");
+    }
 
     @Override
     public void onStop() {
@@ -38,6 +49,12 @@ public class TransactionActivity extends ConnectivityActivity implements Transac
             hasPendingWork=false;
             hideTransactionProgressBar();
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("hasPendingWork",hasPendingWork);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.papco.sundar.cylinderinventory.data;
 
+import com.google.firebase.firestore.Exclude;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -16,6 +18,7 @@ public class Cylinder {
     private boolean isDamaged;
     private String remarks;
     private int damageCount;
+    private String cylinderTypeName;
 
     public Cylinder(){
 
@@ -121,14 +124,30 @@ public class Cylinder {
         this.damageCount = damageCount;
     }
 
+    public String getCylinderTypeName() {
+        return cylinderTypeName;
+    }
+
+    public void setCylinderTypeName(String cylinderTypeName) {
+        this.cylinderTypeName = cylinderTypeName;
+    }
+
+    @Exclude
     public String getStringId(){
 
         return Integer.toString(cylinderNo);
     }
 
+    @Exclude
     public String getStringPurchaseDate(){
 
         SimpleDateFormat format=new SimpleDateFormat("dd/MM/yyyy");
         return format.format(new Date(purchaseDate));
+    }
+
+    @Exclude
+    public String getStringLastTransaction(){
+        SimpleDateFormat format=new SimpleDateFormat("dd/MM/yyyy");
+        return format.format(new Date(lastTransaction));
     }
 }

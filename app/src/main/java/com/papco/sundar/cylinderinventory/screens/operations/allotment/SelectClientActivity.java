@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 
 import com.papco.sundar.cylinderinventory.data.Destination;
 import com.papco.sundar.cylinderinventory.screens.destinations.clients.ClientsActivity;
+import com.papco.sundar.cylinderinventory.screens.operations.allotment.create.CreateAllotmentActivity;
 
 public class SelectClientActivity extends ClientsActivity {
 

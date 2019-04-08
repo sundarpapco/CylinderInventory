@@ -21,6 +21,7 @@ import com.papco.sundar.cylinderinventory.logic.LoadMoreListener;
 import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 import com.papco.sundar.cylinderinventory.screens.batchDetail.BatchDetailActivity;
 import com.papco.sundar.cylinderinventory.screens.cylinders.CylindersActivity;
+import com.papco.sundar.cylinderinventory.screens.cylinders.cylinderTypes.CylinderTypeActivity;
 import com.papco.sundar.cylinderinventory.screens.destinations.clients.ClientsActivity;
 import com.papco.sundar.cylinderinventory.screens.destinations.refills.RefillsActivity;
 import com.papco.sundar.cylinderinventory.screens.destinations.repairs.RepairStationsActivity;
@@ -176,6 +177,11 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
                     case R.id.mnu_drawer_cylinders:
                         showActivity(CylindersActivity.class);
                         result = true;
+                        break;
+
+                    case R.id.mnu_drawer_cylinder_types:
+                        showActivity(CylinderTypeActivity.class);
+                        result=true;
                         break;
 
                     case R.id.mnu_drawer_clients:
