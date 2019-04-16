@@ -2,7 +2,6 @@ package com.papco.sundar.cylinderinventory.screens.common.batchDetailView;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,7 @@ public class CylinderTypeDetailedView {
     private TextView cylinderTypeName,cylinderQuantity;
     private RecyclerView recyclerView;
     private List<Cylinder> monoList;
-    private BatchDetailViewAdapter adapter;
+    private TypeDetailedViewAdaoter adapter;
 
 
     public CylinderTypeDetailedView(Context context, List<Cylinder> monoList,int batchType) throws Exception{
@@ -71,7 +70,7 @@ public class CylinderTypeDetailedView {
 
         cylinderTypeName.setText(monoList.get(0).getCylinderTypeName());
         cylinderQuantity.setText(Integer.toString(monoList.size())+" Cylinders");
-        adapter=new BatchDetailViewAdapter(context,batchType);
+        adapter=new TypeDetailedViewAdaoter(context,batchType);
         adapter.setData(monoList);
 
         int heightDpInPixel= (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,60,context.getResources().getDisplayMetrics());

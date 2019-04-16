@@ -1,12 +1,7 @@
 package com.papco.sundar.cylinderinventory.screens.mainscreen;
 
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
 import android.graphics.PorterDuff;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +16,10 @@ import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.BatchVH> {
 
@@ -64,12 +63,11 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
             return;
         }
 
-        Log.d(TAG, Integer.toString(querySnapshot.getDocumentChanges().size())+" Documents changed");
-
         for(DocumentChange documentChange:querySnapshot.getDocumentChanges()){
 
             if(documentChange.getType()==DocumentChange.Type.ADDED)
                 addDocument(documentChange.getDocument());
+
 
             /*if(documentChange.getType()==DocumentChange.Type.REMOVED)
                 deleteDocument(documentChange.getDocument());
@@ -79,6 +77,17 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
 
         }
 
+    }
+
+    public void setInitialData(List<DocumentSnapshot> data){
+            this.data=data;
+            notifyDataSetChanged();
+    }
+
+    public void clearData(){
+
+        data.clear();
+        notifyDataSetChanged();
     }
 
     private void deleteDocument(DocumentSnapshot documentToDelete){
@@ -137,7 +146,7 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
 
     class BatchVH extends RecyclerView.ViewHolder {
 
-        TextView heading, clientName, cylinderCount, timestamp;
+        TextView heading, clientName, cylinderCount, timestamp,batchNumber;
         View colorView;
 
         public BatchVH(@NonNull View itemView) {
@@ -148,6 +157,7 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
             cylinderCount = itemView.findViewById(R.id.batch_item_no_of_cylinders);
             timestamp = itemView.findViewById(R.id.batch_item_timestamp);
             colorView=itemView.findViewById(R.id.view);
+            batchNumber=itemView.findViewById(R.id.batch_item_batch_number);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -200,6 +210,7 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
             clientName.setText(batch.getDestinationName());
             cylinderCount.setText(Integer.toString(batch.getNoOfCylinders())+" Cylinders");
             timestamp.setText(batch.getStringTimeStamp());
+            batchNumber.setText(batch.getBatchNumber());
 
         }
     }

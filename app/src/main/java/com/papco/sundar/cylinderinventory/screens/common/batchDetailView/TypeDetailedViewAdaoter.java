@@ -3,7 +3,6 @@ package com.papco.sundar.cylinderinventory.screens.common.batchDetailView;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +19,12 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class BatchDetailViewAdapter extends RecyclerView.Adapter<BatchDetailViewAdapter.ViewHolder> {
+public class TypeDetailedViewAdaoter extends RecyclerView.Adapter<TypeDetailedViewAdaoter.ViewHolder> {
 
     private List<Cylinder> data;
     private int backgroundColour;
 
-    public BatchDetailViewAdapter(Context context, int batchType) {
+    public TypeDetailedViewAdaoter(Context context, int batchType) {
         this.data = new ArrayList<>();
         loadBackgroundColour(context, batchType);
     }

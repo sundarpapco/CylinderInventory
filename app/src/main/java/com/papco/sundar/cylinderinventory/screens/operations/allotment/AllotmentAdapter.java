@@ -3,13 +3,6 @@ package com.papco.sundar.cylinderinventory.screens.operations.allotment;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.GradientDrawable;
-
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +14,10 @@ import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.AllotmentVH> {
 
@@ -64,7 +61,7 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
     class AllotmentVH extends RecyclerView.ViewHolder {
 
         private View colorView;
-        private TextView status, destination, cylinderCount, timeStamp;
+        private TextView status, destination, cylinderCount, timeStamp,batchNumber;
 
 
         public AllotmentVH(@NonNull final View itemView) {
@@ -75,20 +72,13 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
             cylinderCount = itemView.findViewById(R.id.batch_item_no_of_cylinders);
             colorView = itemView.findViewById(R.id.view);
             timeStamp = itemView.findViewById(R.id.batch_item_timestamp);
+            batchNumber=itemView.findViewById(R.id.batch_item_batch_number);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    callback.onRecyclerItemClicked(data.get(getAdapterPosition()), getAdapterPosition());
-                }
-            });
+            itemView.setOnClickListener(v -> callback.onRecyclerItemClicked(data.get(getAdapterPosition()), getAdapterPosition()));
 
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    callback.onRecyclerItemLongClicked(data.get(getAdapterPosition()), getAdapterPosition(), itemView);
-                    return true;
-                }
+            itemView.setOnLongClickListener(v -> {
+                callback.onRecyclerItemLongClicked(data.get(getAdapterPosition()), getAdapterPosition(), itemView);
+                return true;
             });
         }
 
@@ -123,6 +113,7 @@ public class AllotmentAdapter extends RecyclerView.Adapter<AllotmentAdapter.Allo
             timeStamp.setText(allotment.getStringTimeStamp());
             destination.setText(allotment.getClientName());
             cylinderCount.setText(Integer.toString(allotment.getNumberOfCylinders()) + " Cylinders");
+            batchNumber.setText("alo-"+allotment.getStringId());
         }
     }
 }

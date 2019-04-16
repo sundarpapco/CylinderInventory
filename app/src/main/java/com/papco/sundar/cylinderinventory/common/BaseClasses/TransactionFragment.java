@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 
 import com.google.android.gms.tasks.Task;
@@ -12,6 +13,8 @@ import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
 
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 public class TransactionFragment extends Fragment implements TransactionRunnable {
@@ -20,6 +23,13 @@ public class TransactionFragment extends Fragment implements TransactionRunnable
     private TransactionRunnerService transactionService;
     private TransactionServiceConnection connection;
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(savedInstanceState!=null)
+            hasPendingWork=savedInstanceState.getBoolean("hasPendingWork");
+    }
 
     @Override
     public void onStop() {
@@ -38,6 +48,12 @@ public class TransactionFragment extends Fragment implements TransactionRunnable
             hasPendingWork=false;
             hideTransactionProgressBar();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("hasPendingWork",hasPendingWork);
     }
 
     @Override
@@ -78,8 +94,10 @@ public class TransactionFragment extends Fragment implements TransactionRunnable
     public void onServiceBinded(TransactionRunnerService service) {
 
         service.setCallback(this);
-        if(hasPendingWork)
+        if(hasPendingWork) {
+            showTransactionProgressBar();
             return;
+        }
 
 
         BaseTransaction transaction=getTransactionToRun(service.getRequestCode());

@@ -79,6 +79,13 @@ public abstract class BaseTransaction implements Transaction.Function<Void> {
     protected void initializeDestination(Transaction transaction, int destId)
             throws FirebaseFirestoreException {
 
+        if(destId==Destination.TYPE_WAREHOUSE){
+            destination=new Destination();
+            destination.setDestType(Destination.TYPE_WAREHOUSE);
+            destination.setId(destId);
+            return;
+        }
+
         DocumentReference destRef = db.collection(DbPaths.COLLECTION_DESTINATIONS).document(Integer.toString(destId));
         DocumentSnapshot destDocument = transaction.get(destRef);
 

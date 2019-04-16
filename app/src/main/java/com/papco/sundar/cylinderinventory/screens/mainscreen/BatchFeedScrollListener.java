@@ -49,6 +49,10 @@ public class BatchFeedScrollListener extends RecyclerView.OnScrollListener {
 
     }
 
+    public boolean isLoading(){
+        return isLoading;
+    }
+
     public void loadCompleted(){
         log("setting load complete");
         isLoading=false;

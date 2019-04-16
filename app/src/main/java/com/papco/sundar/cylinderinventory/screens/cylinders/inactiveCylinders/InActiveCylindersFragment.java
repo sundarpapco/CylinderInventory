@@ -9,7 +9,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,12 +20,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -43,7 +39,6 @@ import com.papco.sundar.cylinderinventory.screens.cylinders.CylindersActivity;
 import com.papco.sundar.cylinderinventory.screens.cylinders.inactiveCylinders.InactiveResultFilter.FilterType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -144,7 +139,7 @@ public class InActiveCylindersFragment extends Fragment {
 
         final FilterType currentFilter = getSelectedFilter();
         final PopupMenu menu = new PopupMenu(getActivity(), view);
-        menu.getMenuInflater().inflate(R.menu.mnu_filter_type, menu.getMenu());
+        menu.getMenuInflater().inflate(R.menu.mnu_inactive_cyl_filter, menu.getMenu());
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {

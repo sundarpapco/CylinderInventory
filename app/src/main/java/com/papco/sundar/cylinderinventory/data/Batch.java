@@ -1,11 +1,9 @@
 package com.papco.sundar.cylinderinventory.data;
 
-import com.google.common.base.CaseFormat;
 import com.google.firebase.firestore.Exclude;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 public class Batch {
@@ -134,11 +132,11 @@ public class Batch {
                 break;
 
             case TYPE_REPAIR:
-                batchNumber = "rci-";
+                batchNumber = "rep-";
                 break;
 
             case TYPE_RCI:
-                batchNumber = "rep-";
+                batchNumber = "rci-";
                 break;
 
         }

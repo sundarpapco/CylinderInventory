@@ -95,8 +95,10 @@ public class TransactionActivity extends ConnectivityActivity implements Transac
     public final void onServiceBinded(TransactionRunnerService service) {
 
         service.setCallback(this);
-        if(hasPendingWork)
+        if(hasPendingWork) {
+            showTransactionProgressBar();
             return;
+        }
 
         BaseTransaction transaction=getTransactionToRun(service.getRequestCode());
 

@@ -10,12 +10,17 @@ import com.papco.sundar.cylinderinventory.data.Aggregation;
 public class CounterAggregation {
 
     private DocumentReference counterRef;
-    private DocumentSnapshot counterDoc;
     private Aggregation counter;
-    private FirebaseFirestore db=FirebaseFirestore.getInstance();
+    private int initialValue;
 
     public CounterAggregation(String aggPath){
+        this(aggPath,0);
+    }
+
+    public CounterAggregation(String aggPath,int initialValue){
+        FirebaseFirestore db=FirebaseFirestore.getInstance();
         counterRef=db.document(aggPath);
+        this.initialValue=initialValue;
     }
 
     public void initializeWith(Transaction transaction) throws FirebaseFirestoreException{
@@ -24,13 +29,13 @@ public class CounterAggregation {
             throw new FirebaseFirestoreException("Cannot initialize counter twice",
                     FirebaseFirestoreException.Code.CANCELLED);
 
-        counterDoc =transaction.get(counterRef);
+        DocumentSnapshot counterDoc =transaction.get(counterRef);
 
         if(counterDoc.exists()){
             counter=counterDoc.toObject(Aggregation.class);
         }else{
             counter=new Aggregation();
-            counter.setCount(0);
+            counter.setCount(initialValue);
         }
     }
 

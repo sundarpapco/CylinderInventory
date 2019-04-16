@@ -211,6 +211,11 @@ public class CreateAllotmentActivity extends TransactionActivity implements Recy
 
     protected void onCreateAllotment(){
 
+        if(adapter.getData().size()==0){
+            Msg.show(this,"Please add at least one requirement");
+            return;
+        }
+
         String successMsg="Allotment created successfully";
         String progressMsg="Creating allotment";
         String failureMsg="Failed to create allotment. Check internet connection";
