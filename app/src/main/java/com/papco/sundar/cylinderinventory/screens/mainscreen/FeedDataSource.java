@@ -1,10 +1,10 @@
 package com.papco.sundar.cylinderinventory.screens.mainscreen;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.papco.sundar.cylinderinventory.common.Msg;
@@ -22,26 +22,24 @@ public class FeedDataSource {
     private List<DocumentSnapshot> initialDataCache;
     private List<DocumentSnapshot> configChangeBackup;
     private ListenerRegistration listenerRegistration;
-    private FeedDataCallback callback;
+    private Callback callback;
 
-    public FeedDataSource(@NonNull Context context) {
+    FeedDataSource(@NonNull Context context) {
 
         this.context = context;
     }
 
-
-
-    public void setCallback(FeedDataCallback callback) {
+    public void setCallback(Callback callback) {
         this.callback = callback;
     }
 
-    public void setConfigChangeBackup(List<DocumentSnapshot> configChangeBackup) {
+    void setConfigChangeBackup(List<DocumentSnapshot> configChangeBackup) {
         this.configChangeBackup = configChangeBackup;
     }
 
 
 
-    private Query constructQuery(int typeFilter, int timeFilter) {
+    private Query constructQuery(int typeFilter, long timeFilter) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -81,7 +79,7 @@ public class FeedDataSource {
         return query;
     }
 
-    public void loadInitialData(int typeFilter, int timeFilter) {
+    void loadInitialData(int typeFilter, long timeFilter) {
 
 
         // if the observer is starting to load after the config change
@@ -106,8 +104,10 @@ public class FeedDataSource {
                 .addSnapshotListener((querySnapshot, e) -> {
 
                     if (e != null) {
-                        Msg.show(context, "Error fetching documents");
-                        Log.d("SUNDAR", e.getMessage());
+                        if(e.getCode()==FirebaseFirestoreException.Code.CANCELLED)
+                            Msg.show(context,e.getMessage());
+                        else
+                            Msg.show(context,"Couldn't refresh feed");
                         return;
                     }
 
@@ -119,7 +119,7 @@ public class FeedDataSource {
 
     }
 
-    public void loadAfter(DocumentSnapshot lastSnapshot) {
+    void loadAfter(DocumentSnapshot lastSnapshot) {
 
         if (lastSnapshot == null)
             return;
@@ -135,13 +135,13 @@ public class FeedDataSource {
                     }
 
                     if (callback != null)
-                        callback.onNextPageLoadComplete(task.getResult().getDocuments());
+                        callback.onLoadNextComplete(task.getResult().getDocuments());
 
                 });
 
     }
 
-    public void loadBefore(DocumentSnapshot snapshot) {
+    void loadBefore(DocumentSnapshot snapshot) {
 
         if (snapshot == null)
             return;
@@ -156,33 +156,33 @@ public class FeedDataSource {
                     }
 
                     if (callback != null)
-                        callback.onPreviousLoadComplete(task.getResult().getDocuments());
+                        callback.onLoadPreviousComplete(task.getResult().getDocuments());
 
                 });
 
     }
 
 
-    public void clearData() {
+    void onDestroy() {
 
         if (listenerRegistration != null)
             listenerRegistration.remove();
     }
 
-    public void clearCallback() {
+    void clearCallback() {
 
         this.callback = null;
     }
 
 
 
-    public interface FeedDataCallback {
+    public interface Callback {
 
         void onInitialLoadComplete(List<DocumentSnapshot> initialData);
 
-        void onNextPageLoadComplete(List<DocumentSnapshot> nextPageData);
+        void onLoadNextComplete(List<DocumentSnapshot> nextPageData);
 
-        void onPreviousLoadComplete(List<DocumentSnapshot> previousData);
+        void onLoadPreviousComplete(List<DocumentSnapshot> previousData);
 
     }
 }

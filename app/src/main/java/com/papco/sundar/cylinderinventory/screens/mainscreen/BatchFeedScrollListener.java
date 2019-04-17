@@ -2,7 +2,6 @@ package com.papco.sundar.cylinderinventory.screens.mainscreen;
 
 import android.util.Log;
 
-import com.papco.sundar.cylinderinventory.logic.LoadMoreListener;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,14 +17,20 @@ public class BatchFeedScrollListener extends RecyclerView.OnScrollListener {
     private boolean isLoading=false;
     private boolean allLoadingComplete=false;
     private LinearLayoutManager layoutManager;
-    private LoadMoreListener callback;
+    private Callback callback;
 
 
-    public BatchFeedScrollListener(@NonNull LinearLayoutManager layoutManager, @NonNull LoadMoreListener callback) {
+    public BatchFeedScrollListener(@NonNull LinearLayoutManager layoutManager) {
         this.layoutManager = layoutManager;
+    }
+
+    public void setCallback(Callback callback) {
         this.callback = callback;
     }
 
+    public void clearCallback(){
+        this.callback=null;
+    }
 
     @Override
     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -58,7 +63,7 @@ public class BatchFeedScrollListener extends RecyclerView.OnScrollListener {
         isLoading=false;
     }
 
-    public void setAllLoadingCOmplete(){
+    public void setAllLoadingComplete(){
 
         log("setting all load complete");
         allLoadingComplete=true;
@@ -67,5 +72,11 @@ public class BatchFeedScrollListener extends RecyclerView.OnScrollListener {
     private void log(String msg){
 
         Log.d(TAG, msg);
+    }
+
+    public interface Callback{
+
+        void loadMoreData();
+
     }
 }

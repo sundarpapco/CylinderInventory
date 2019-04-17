@@ -7,31 +7,32 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.papco.sundar.cylinderinventory.R;
+import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.data.Batch;
-import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.BatchVH> {
+public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.BatchVH>
+        implements FeedDataSource.Callback, BatchFeedScrollListener.Callback {
 
-    public static final String TAG="SUNDAR";
     private List<DocumentSnapshot> data;
-    private RecyclerListener<Batch> callback;
+    private FeedAdapterCallBack callback;
     private Context context;
+    private BatchFeedScrollListener scrollListener;
 
-    public BatchFeedAdapter(@NonNull Context context, @NonNull RecyclerListener<Batch> callback) {
-        this.data = new ArrayList<>();
-        this.callback=callback;
-        this.context=context;
+    private FeedDataSource dataSource;
+
+    BatchFeedAdapter(@NonNull Context context, @NonNull FeedAdapterCallBack callback) {
+        this.data = new LinkedList<>();
+        this.callback = callback;
+        this.context = context;
     }
 
 
@@ -55,152 +56,161 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
     }
 
 
-    public void setInitialData(QuerySnapshot querySnapshot) {
+    void setDataSource(@NonNull FeedDataSource dataSource) {
 
-        if(data.size()==0){
-            data=querySnapshot.getDocuments();
-            notifyItemRangeInserted(0,data.size());
+        this.dataSource = dataSource;
+        dataSource.setCallback(this);
+    }
+
+    void setFilters(int typeFilter, long timeFilter) {
+
+        if (dataSource == null) {
+            Msg.show(context, "Set data source before setting filters");
             return;
         }
 
-        for(DocumentChange documentChange:querySnapshot.getDocumentChanges()){
-
-            if(documentChange.getType()==DocumentChange.Type.ADDED)
-                addDocument(documentChange.getDocument());
-
-
-            /*if(documentChange.getType()==DocumentChange.Type.REMOVED)
-                deleteDocument(documentChange.getDocument());
-
-            if(documentChange.getType()==DocumentChange.Type.MODIFIED)
-                updateDocument(documentChange.getDocument());*/
-
-        }
-
-    }
-
-    public void setInitialData(List<DocumentSnapshot> data){
-            this.data=data;
-            notifyDataSetChanged();
-    }
-
-    public void clearData(){
-
+        callback.onStartLoadingData();
         data.clear();
         notifyDataSetChanged();
+        dataSource.loadInitialData(typeFilter, timeFilter);
     }
 
-    private void deleteDocument(DocumentSnapshot documentToDelete){
+    void setScrollListener(BatchFeedScrollListener scrollListener) {
+        this.scrollListener = scrollListener;
+        scrollListener.setCallback(this);
+    }
 
-        for(int i=0;i<data.size();++i){
+    private void loadNextPage() {
 
-            if(data.get(i).getId().equals(documentToDelete)){
+        if (data.size() == 0 || dataSource == null)
+            return;
 
-                data.remove(i);
-                notifyItemRemoved(i);
-                return;
-            }
+        dataSource.loadAfter(data.get(data.size() - 1));
+
+    }
+
+    void onConfigChange() {
+
+        dataSource.setConfigChangeBackup(data);
+        dataSource.clearCallback();
+        scrollListener.clearCallback();
+    }
+
+    private void runDiff(List<DocumentSnapshot> newList) {
+
+        List<DocumentSnapshot> oldList;
+
+        if (data.size() <= BatchFeedScrollListener.PAGE_SIZE)
+            oldList = data;
+        else
+            oldList = data.subList(0, BatchFeedScrollListener.PAGE_SIZE);
+
+        DiffUtilRunner diffUtilRunner=new DiffUtilRunner(result -> {
+
+            oldList.clear();
+            data.addAll(0,newList);
+            result.dispatchUpdatesTo(BatchFeedAdapter.this);
+
+        });
+
+        diffUtilRunner.execute(oldList,newList);
+
+    }
+
+
+    @Override
+    public void onInitialLoadComplete(List<DocumentSnapshot> initialData) {
+
+        if (data.size() == 0) {
+            this.data = initialData;
+            notifyDataSetChanged();
+        } else {
+            //its a invalidation request
+            if (data.size() <= BatchFeedScrollListener.PAGE_SIZE) {
+                runDiff(initialData);
+            } else
+                dataSource.loadBefore(data.get(BatchFeedScrollListener.PAGE_SIZE + 1));
         }
+        callback.onFinishLoadingData();
 
     }
 
-    private void updateDocument(DocumentSnapshot documentToUpdate){
+    @Override
+    public void onLoadNextComplete(List<DocumentSnapshot> nextPageData) {
 
-        for(int i=0;i<data.size();++i){
+        scrollListener.loadCompleted();
+        if (nextPageData.size() < BatchFeedScrollListener.PAGE_SIZE)
+            scrollListener.setAllLoadingComplete();
 
-            if(data.get(i).getId().equals(documentToUpdate)){
+        int oldDatacount = data.size();
+        data.addAll(nextPageData);
+        notifyItemRangeInserted(oldDatacount, nextPageData.size());
 
-                data.set(i,documentToUpdate);
-                notifyItemChanged(i);
-                return;
-            }
-        }
-    }
-
-    private void addDocument(DocumentSnapshot documentToAdd){
-
-        data.add(0,documentToAdd);
-        notifyItemInserted(0);
 
     }
 
-    public void addData(List<DocumentSnapshot> moreData){
-
-        int oldDatacount=data.size();
-        data.addAll(moreData);
-        notifyItemRangeInserted(oldDatacount,moreData.size());
-
+    @Override
+    public void onLoadPreviousComplete(List<DocumentSnapshot> previousData) {
+        runDiff(previousData);
     }
 
-    public List<DocumentSnapshot> getData() {
-        return data;
-    }
-
-    public DocumentSnapshot getLastLoadedDocument(){
-
-        if(data.size()==0)
-            return null;
-
-        return data.get(data.size()-1);
+    @Override
+    public void loadMoreData() {
+        loadNextPage();
     }
 
     class BatchVH extends RecyclerView.ViewHolder {
 
-        TextView heading, clientName, cylinderCount, timestamp,batchNumber;
+        TextView heading, clientName, cylinderCount, timestamp, batchNumber;
         View colorView;
 
-        public BatchVH(@NonNull View itemView) {
+        BatchVH(@NonNull View itemView) {
             super(itemView);
 
             heading = itemView.findViewById(R.id.batch_item_title);
             clientName = itemView.findViewById(R.id.batch_item_destination_name);
             cylinderCount = itemView.findViewById(R.id.batch_item_no_of_cylinders);
             timestamp = itemView.findViewById(R.id.batch_item_timestamp);
-            colorView=itemView.findViewById(R.id.view);
-            batchNumber=itemView.findViewById(R.id.batch_item_batch_number);
+            colorView = itemView.findViewById(R.id.view);
+            batchNumber = itemView.findViewById(R.id.batch_item_batch_number);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    callback.onRecyclerItemClicked(data.get(getAdapterPosition()).toObject(Batch.class),getAdapterPosition());
-                }
-            });
+            itemView.setOnClickListener(v -> callback.onRecyclerItemClicked(data.get(getAdapterPosition()).toObject(Batch.class), getAdapterPosition()));
         }
 
         public void bind() {
 
             Batch batch = data.get(getAdapterPosition()).toObject(Batch.class);
-            int roundColor=1;
+            int roundColor = 1;
             switch (batch.getType()) {
 
                 case Batch.TYPE_INVOICE:
                     heading.setText("Invoice");
-                    roundColor= ContextCompat.getColor(context,R.color.invoice_green);
+                    roundColor = ContextCompat.getColor(context, R.color.invoice_green);
                     break;
 
                 case Batch.TYPE_ECR:
                     heading.setText("Empty cylinder return");
-                    roundColor= ContextCompat.getColor(context,R.color.ecr_blue);
+                    roundColor = ContextCompat.getColor(context, R.color.ecr_blue);
                     break;
 
                 case Batch.TYPE_FCI:
                     heading.setText("Full cylinder inward");
-                    roundColor= ContextCompat.getColor(context,R.color.fci_green);
+                    roundColor = ContextCompat.getColor(context, R.color.fci_green);
                     break;
 
                 case Batch.TYPE_RCI:
                     heading.setText("Repair cylinder inward");
-                    roundColor= ContextCompat.getColor(context,R.color.rci_orange);
+                    roundColor = ContextCompat.getColor(context, R.color.rci_orange);
                     break;
 
                 case Batch.TYPE_REFILL:
                     heading.setText("Sent for refilling");
-                    roundColor= ContextCompat.getColor(context,R.color.ref_pink);
+                    roundColor = ContextCompat.getColor(context, R.color.ref_pink);
                     break;
 
                 case Batch.TYPE_REPAIR:
                     heading.setText("Sent for repair");
-                    roundColor= ContextCompat.getColor(context,R.color.rep_red);
+                    roundColor = ContextCompat.getColor(context, R.color.rep_red);
                     break;
 
 
@@ -208,10 +218,22 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
 
             colorView.getBackground().setColorFilter(roundColor, PorterDuff.Mode.MULTIPLY);
             clientName.setText(batch.getDestinationName());
-            cylinderCount.setText(Integer.toString(batch.getNoOfCylinders())+" Cylinders");
+            cylinderCount.setText(Integer.toString(batch.getNoOfCylinders()) + " Cylinders");
             timestamp.setText(batch.getStringTimeStamp());
             batchNumber.setText(batch.getBatchNumber());
 
         }
+    }
+
+    public interface FeedAdapterCallBack {
+
+        void onRecyclerItemClicked(Batch item, int position);
+
+        void onRecyclerItemLongClicked(Batch item, int position, View view);
+
+        void onStartLoadingData();
+
+        void onFinishLoadingData();
+
     }
 }

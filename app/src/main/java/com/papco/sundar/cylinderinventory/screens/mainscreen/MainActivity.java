@@ -19,7 +19,6 @@ import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.ConnectivityActivity;
 import com.papco.sundar.cylinderinventory.common.SpacingDecoration;
 import com.papco.sundar.cylinderinventory.data.Batch;
-import com.papco.sundar.cylinderinventory.logic.RecyclerListener;
 import com.papco.sundar.cylinderinventory.screens.batchDetail.BatchDetailActivity;
 import com.papco.sundar.cylinderinventory.screens.cylinders.CylindersActivity;
 import com.papco.sundar.cylinderinventory.screens.cylinders.cylinderTypes.CylinderTypeActivity;
@@ -47,7 +46,7 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MainActivity extends ConnectivityActivity implements RecyclerListener<Batch>, DatePickerDialog.OnDateSetListener {
+public class MainActivity extends ConnectivityActivity implements BatchFeedAdapter.FeedAdapterCallBack, DatePickerDialog.OnDateSetListener {
 
     public static final String NOTIFICATION_CHANNEL_ID = "transactionChannelID";
     public static final String NOTIFICATION_CHANNEL_NAME = "Cylinder Inventory";
@@ -66,11 +65,10 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
     private DrawerLayout drawerLayout;
     private RecyclerView recyclerView;
     private BatchFeedAdapter adapter;
-    private BatchFeedScrollListener scrollListener;
     private ProgressBar progressBar;
     private ConstraintLayout timelineFilterView;
     private TextView timeline_filter_info;
-    private AppCompatImageView timlineFilterClose;
+    private AppCompatImageView timelineFilterClose;
     private int typeFilter = 0;
     private long timelineFilter = -1;
 
@@ -88,12 +86,6 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
         setupDrawer();
         createNotificationChannel();
         FirebaseApp.initializeApp(getApplicationContext());
-
-        initViewModel();
-        showProgressBar();
-
-        if (savedInstanceState == null)
-            viewModel.loadFirstPage(typeFilter,timelineFilter);
 
     }
 
@@ -116,33 +108,8 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        viewModel.setFeedBackup(adapter.getData());
+        adapter.onConfigChange();
     }
-
-    private void initViewModel() {
-
-        viewModel.getFirstPage().observe(this, querySnapshot -> {
-
-            if (viewModel.getFeedBackup() == null) {
-                adapter.setInitialData(querySnapshot);
-            } else {
-                adapter.setInitialData(viewModel.getFeedBackup());
-                viewModel.setFeedBackup(null);
-            }
-            hideProgressBar();
-        });
-
-        viewModel.getLoadedPage().observe(this, documentSnapshots -> {
-            if(scrollListener.isLoading()) {
-                adapter.addData(documentSnapshots);
-                scrollListener.loadCompleted();
-                if (documentSnapshots.size() < BatchFeedScrollListener.PAGE_SIZE)
-                    scrollListener.setAllLoadingCOmplete();
-            }
-        });
-
-    }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -200,7 +167,7 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
         progressBar = findViewById(R.id.main_progress_bar);
         timelineFilterView = findViewById(R.id.timeline_filter_view);
         timeline_filter_info = findViewById(R.id.timeline_filter_info);
-        timlineFilterClose = findViewById(R.id.timeline_filter_close);
+        timelineFilterClose = findViewById(R.id.timeline_filter_close);
     }
 
     private void initViews() {
@@ -208,12 +175,15 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
         SpacingDecoration decoration = new SpacingDecoration(this, SpacingDecoration.VERTICAL, 18, 12, 24);
         adapter = new BatchFeedAdapter(getApplicationContext(), this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        scrollListener = new BatchFeedScrollListener(layoutManager, () -> viewModel.loadNextPage(adapter.getLastLoadedDocument()));
+        BatchFeedScrollListener scrollListener = new BatchFeedScrollListener(layoutManager);
+        adapter.setDataSource(viewModel.getFeedDataSource());
+        adapter.setScrollListener(scrollListener);
 
         recyclerView.addItemDecoration(decoration);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addOnScrollListener(scrollListener);
         recyclerView.setAdapter(adapter);
+        adapter.setFilters(typeFilter,timelineFilter);
 
         if (timelineFilter == -1)
             hideTimelineFilterView();
@@ -221,7 +191,7 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
             showTimelineFilterView();
 
 
-        timlineFilterClose.setOnClickListener(v -> clearTimelineFilter());
+        timelineFilterClose.setOnClickListener(v -> clearTimelineFilter());
     }
 
     private void restoreFilters(Bundle savedInstanceState){
@@ -241,20 +211,14 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
 
         timelineFilter=chosenTime;
         showTimelineFilterView();
-        showProgressBar();
-        adapter.clearData();
-        viewModel.loadFirstPage(typeFilter,timelineFilter);
-
+        adapter.setFilters(typeFilter,timelineFilter);
     }
 
     private void clearTimelineFilter() {
 
         timelineFilter = -1;
         hideTimelineFilterView();
-        showProgressBar();
-        adapter.clearData();
-        viewModel.loadFirstPage(typeFilter,-1);
-
+        adapter.setFilters(typeFilter,-1);
     }
 
     private void hideTimelineFilterView() {
@@ -283,11 +247,8 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
         else
             this.typeFilter=typeFilter;
 
-        showProgressBar();
-        if (adapter != null)
-            adapter.clearData();
         setTitle();
-        viewModel.loadFirstPage(typeFilter,timelineFilter);
+        adapter.setFilters(typeFilter,timelineFilter);
         invalidateOptionsMenu();
 
     }
@@ -470,6 +431,16 @@ public class MainActivity extends ConnectivityActivity implements RecyclerListen
     @Override
     public void onRecyclerItemLongClicked(Batch item, int position, View view) {
 
+    }
+
+    @Override
+    public void onStartLoadingData() {
+        showProgressBar();
+    }
+
+    @Override
+    public void onFinishLoadingData() {
+        hideProgressBar();
     }
 
     @Override
