@@ -1,4 +1,4 @@
-package com.papco.sundar.cylinderinventory.screens.mainscreen;
+package com.papco.sundar.cylinderinventory.screens.cylinders.history;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -11,6 +11,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.Msg;
 import com.papco.sundar.cylinderinventory.data.Batch;
+import com.papco.sundar.cylinderinventory.screens.mainscreen.BatchFeedScrollListener;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,17 +20,18 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.BatchVH>
-        implements FeedDataSource.Callback, BatchFeedScrollListener.Callback {
+public class CylHistoryAdapter extends RecyclerView.Adapter<CylHistoryAdapter.ViewHolder>
+        implements CylHistoryDataSource.Callback, BatchFeedScrollListener.Callback {
+
 
     private List<DocumentSnapshot> data;
-    private FeedAdapterCallBack callback;
+    private Callback callback;
     private Context context;
     private BatchFeedScrollListener scrollListener;
 
-    private FeedDataSource dataSource;
+    private CylHistoryDataSource dataSource;
 
-    BatchFeedAdapter(@NonNull Context context, @NonNull FeedAdapterCallBack callback) {
+    CylHistoryAdapter(@NonNull Context context, @NonNull Callback callback) {
         this.data = new LinkedList<>();
         this.callback = callback;
         this.context = context;
@@ -38,14 +40,14 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
 
     @NonNull
     @Override
-    public BatchVH onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.batch_item, viewGroup, false);
-        return new BatchVH(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BatchVH batchVH, int i) {
+    public void onBindViewHolder(@NonNull ViewHolder batchVH, int i) {
         batchVH.bind();
 
     }
@@ -56,13 +58,13 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
     }
 
 
-    void setDataSource(@NonNull FeedDataSource dataSource) {
+    void setDataSource(@NonNull CylHistoryDataSource dataSource) {
 
         this.dataSource = dataSource;
         dataSource.setCallback(this);
     }
 
-    void setFilters(int typeFilter, long timeFilter) {
+    void setFilters(int typeFilter, long timeFilter, int cylinderNumber) {
 
         if (dataSource == null) {
             Msg.show(context, "Set data source before setting filters");
@@ -72,7 +74,7 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
         callback.onStartLoadingData();
         data.clear();
         notifyDataSetChanged();
-        dataSource.loadInitialData(typeFilter, timeFilter);
+        dataSource.loadInitialData(typeFilter, timeFilter, cylinderNumber);
     }
 
     void setScrollListener(BatchFeedScrollListener scrollListener) {
@@ -85,7 +87,7 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
         if (data.size() == 0 || dataSource == null)
             return;
 
-        dataSource.loadAfter(data.get(data.size() - 1));
+        dataSource.loadMoreData(data.get(data.size() - 1));
 
     }
 
@@ -96,75 +98,35 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
         scrollListener.clearCallback();
     }
 
-    private void runDiff(List<DocumentSnapshot> newList) {
-
-        List<DocumentSnapshot> oldList;
-
-        if (data.size() <= BatchFeedScrollListener.PAGE_SIZE)
-            oldList = data;
-        else
-            oldList = data.subList(0, BatchFeedScrollListener.PAGE_SIZE);
-
-        DiffUtilRunner diffUtilRunner=new DiffUtilRunner(result -> {
-
-            oldList.clear();
-            data.addAll(0,newList);
-            result.dispatchUpdatesTo(BatchFeedAdapter.this);
-
-        });
-
-        diffUtilRunner.execute(oldList,newList);
-
-    }
-
 
     @Override
-    public void onInitialLoadComplete(List<DocumentSnapshot> initialData) {
+    public void onLoadComplete(List<DocumentSnapshot> initialData) {
 
         if (data.size() == 0) {
             this.data = initialData;
             notifyDataSetChanged();
         } else {
             //its a invalidation request
-            if (data.size() <= BatchFeedScrollListener.PAGE_SIZE) {
-                runDiff(initialData);
-            } else
-                dataSource.loadBefore(data.get(BatchFeedScrollListener.PAGE_SIZE + 1));
+            int oldSize = data.size();
+            data.addAll(initialData);
+            notifyItemRangeInserted(oldSize, data.size());
         }
         callback.onFinishLoadingData();
 
     }
 
-    @Override
-    public void onLoadNextComplete(List<DocumentSnapshot> nextPageData) {
-
-        scrollListener.loadCompleted();
-        if (nextPageData.size() < BatchFeedScrollListener.PAGE_SIZE)
-            scrollListener.setAllLoadingComplete();
-
-        int oldDatacount = data.size();
-        data.addAll(nextPageData);
-        notifyItemRangeInserted(oldDatacount, nextPageData.size());
-
-
-    }
-
-    @Override
-    public void onLoadPreviousComplete(List<DocumentSnapshot> previousData) {
-        runDiff(previousData);
-    }
 
     @Override
     public void loadMoreData() {
         loadNextPage();
     }
 
-    class BatchVH extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView heading, clientName, cylinderCount, timestamp, batchNumber;
         View colorView;
 
-        BatchVH(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             heading = itemView.findViewById(R.id.batch_item_title);
@@ -176,8 +138,8 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
 
             itemView.setOnClickListener(v -> callback.onRecyclerItemClicked(data.get(getAdapterPosition()).toObject(Batch.class), getAdapterPosition()));
             itemView.setOnLongClickListener(v -> {
-                if(callback!=null)
-                    callback.onRecyclerItemLongClicked(data.get(getAdapterPosition()).toObject(Batch.class),getAdapterPosition(),v);
+                if (callback != null)
+                    callback.onRecyclerItemLongClicked(data.get(getAdapterPosition()).toObject(Batch.class), getAdapterPosition(), v);
                 return false;
             });
         }
@@ -230,7 +192,7 @@ public class BatchFeedAdapter extends RecyclerView.Adapter<BatchFeedAdapter.Batc
         }
     }
 
-    public interface FeedAdapterCallBack {
+    public interface Callback {
 
         void onRecyclerItemClicked(Batch item, int position);
 

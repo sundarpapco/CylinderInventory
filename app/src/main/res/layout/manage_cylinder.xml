@@ -89,17 +89,30 @@
                 app:layout_constraintStart_toEndOf="@+id/mng_cyl_no_text" />
 
             <TextView
+                android:id="@+id/mng_cyl_show_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="4dp"
+                android:fontFamily="sans-serif-condensed"
+                android:text="SHOW HISTORY"
+                android:textColor="@color/colorAccent"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/mng_cyl_no_text" />
+
+            <TextView
                 android:id="@+id/mng_cyl_purchase_date_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:layout_marginTop="37dp"
+                android:layout_marginTop="24dp"
                 android:fontFamily="sans-serif-condensed"
                 android:text="Purchase date:"
                 android:textColor="@color/borderGrey"
                 android:textSize="18sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_no_text" />
+                app:layout_constraintTop_toBottomOf="@+id/mng_cyl_show_history" />
 
             <TextView
                 android:id="@+id/mng_cyl_purchase_date"

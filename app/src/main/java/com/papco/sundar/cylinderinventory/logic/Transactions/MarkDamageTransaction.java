@@ -105,6 +105,8 @@ public class MarkDamageTransaction extends BaseTransaction {
             typeDamagedCounter.setType(Aggregation.TYPE_CYLINDERS);
         }
 
+        cylinder.invalidateSnapshot();
+        cylinder.setLastTransaction(getTimestamp());
         cylinder.setDamaged(true);
         cylinder.setEmpty(true);
         cylinder.setDamageCount(cylinder.getDamageCount() + 1);

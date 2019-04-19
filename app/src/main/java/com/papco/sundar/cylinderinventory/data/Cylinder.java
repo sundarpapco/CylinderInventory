@@ -20,6 +20,15 @@ public class Cylinder {
     private int damageCount;
     private String cylinderTypeName;
 
+    private int snapRefillCount;
+    private int snapLocationId;
+    private String snapLocationName;
+    private long snapLastTransaction;
+    private boolean snapIsEmpty;
+    private boolean snapIsDamaged;
+    private int snapDamageCount;
+
+
     public Cylinder(){
 
         cylinderNo=-1;
@@ -33,6 +42,14 @@ public class Cylinder {
         remarks="";
         locationName="WAREHOUSE";
         damageCount=0;
+
+        snapRefillCount=refillCount;
+        snapLocationId=locationId;
+        snapLocationName=locationName;
+        snapLastTransaction=-1;
+        snapIsEmpty=false;
+        snapIsDamaged=false;
+        snapDamageCount=0;
 
     }
 
@@ -132,6 +149,62 @@ public class Cylinder {
         this.cylinderTypeName = cylinderTypeName;
     }
 
+    public int getSnapRefillCount() {
+        return snapRefillCount;
+    }
+
+    public void setSnapRefillCount(int snapRefillCount) {
+        this.snapRefillCount = snapRefillCount;
+    }
+
+    public int getSnapLocationId() {
+        return snapLocationId;
+    }
+
+    public void setSnapLocationId(int snapLocationId) {
+        this.snapLocationId = snapLocationId;
+    }
+
+    public String getSnapLocationName() {
+        return snapLocationName;
+    }
+
+    public void setSnapLocationName(String snapLocationName) {
+        this.snapLocationName = snapLocationName;
+    }
+
+    public long getSnapLastTransaction() {
+        return snapLastTransaction;
+    }
+
+    public void setSnapLastTransaction(long snapLastTransaction) {
+        this.snapLastTransaction = snapLastTransaction;
+    }
+
+    public boolean isSnapIsEmpty() {
+        return snapIsEmpty;
+    }
+
+    public void setSnapIsEmpty(boolean snapIsEmpty) {
+        this.snapIsEmpty = snapIsEmpty;
+    }
+
+    public boolean isSnapIsDamaged() {
+        return snapIsDamaged;
+    }
+
+    public void setSnapIsDamaged(boolean snapIsDamaged) {
+        this.snapIsDamaged = snapIsDamaged;
+    }
+
+    public int getSnapDamageCount() {
+        return snapDamageCount;
+    }
+
+    public void setSnapDamageCount(int snapDamageCount) {
+        this.snapDamageCount = snapDamageCount;
+    }
+
     @Exclude
     public String getStringId(){
 
@@ -149,5 +222,45 @@ public class Cylinder {
     public String getStringLastTransaction(){
         SimpleDateFormat format=new SimpleDateFormat("dd/MM/yyyy");
         return format.format(new Date(lastTransaction));
+    }
+
+    @Exclude
+    public void takeSnapShot(){
+
+        snapRefillCount=refillCount;
+        snapLocationId=locationId;
+        snapLocationName=locationName;
+        snapLastTransaction=lastTransaction;
+        snapIsEmpty=isEmpty;
+        snapIsDamaged=isDamaged;
+        snapDamageCount=damageCount;
+
+    }
+
+    @Exclude
+    public boolean hasValidSnapshot(){
+
+        return snapLastTransaction!=-1;
+    }
+
+    @Exclude
+    public void restoreSnapshot(){
+
+        refillCount=snapRefillCount;
+        locationId=snapLocationId;
+        locationName=snapLocationName;
+        lastTransaction=snapLastTransaction;
+        isEmpty=snapIsEmpty;
+        isDamaged=snapIsDamaged;
+        damageCount=snapDamageCount;
+
+        invalidateSnapshot();
+
+    }
+
+    @Exclude
+    public void invalidateSnapshot(){
+
+        snapLastTransaction=-1;
     }
 }

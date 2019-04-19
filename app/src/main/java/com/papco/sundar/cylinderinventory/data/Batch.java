@@ -5,6 +5,9 @@ import com.google.firebase.firestore.Exclude;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
+import androidx.annotation.NonNull;
 
 public class Batch {
 
@@ -15,9 +18,9 @@ public class Batch {
     public static final int TYPE_REPAIR = 5;
     public static final int TYPE_RCI = 6;
     @Exclude
-    private static final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy, hh:mm a");
+    private static final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy, hh:mm a", Locale.US);
     @Exclude
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy",Locale.US);
 
 
     private long id;
@@ -222,9 +225,9 @@ public class Batch {
     }
 
     @Exclude
-    public void setCylindersAndTypes(List<List<Cylinder>> masterList){
+    public void setCylindersAndTypes(@NonNull List<List<Cylinder>> masterList){
 
-        if(masterList==null || masterList.size()==0){
+        if(masterList.size()==0){
             cylinders=null;
             cylinderTypes=null;
         }

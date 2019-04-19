@@ -4,11 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.widget.NestedScrollView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +23,6 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.TransactionFragment;
@@ -36,6 +31,11 @@ import com.papco.sundar.cylinderinventory.data.Cylinder;
 import com.papco.sundar.cylinderinventory.data.Destination;
 import com.papco.sundar.cylinderinventory.logic.Transactions.DeleteCylinderTransaction;
 import com.papco.sundar.cylinderinventory.logic.Transactions.MarkDamageTransaction;
+import com.papco.sundar.cylinderinventory.screens.cylinders.history.CylinderHistoryActivity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 
 public class ManageCylinderFragment extends TransactionFragment {
 
@@ -51,7 +51,7 @@ public class ManageCylinderFragment extends TransactionFragment {
     private ListenerRegistration activeListener;
 
     private TextView cylinderNo, purchaseDate, supplier, remarks, refills, repairs, location, status, cylinderType;
-    private TextView lastTransaction;
+    private TextView lastTransaction,showHistory;
 
     private Button btnMarkRepair, btnDelete;
 
@@ -113,6 +113,7 @@ public class ManageCylinderFragment extends TransactionFragment {
         status = view.findViewById(R.id.mng_cyl_status);
         cylinderType=view.findViewById(R.id.mng_cyl_cylinder_type);
         lastTransaction=view.findViewById(R.id.mng_cyl_last_transaction);
+        showHistory=view.findViewById(R.id.mng_cyl_show_history);
 
     }
 
@@ -124,40 +125,32 @@ public class ManageCylinderFragment extends TransactionFragment {
         btnDelete = view.findViewById(R.id.mng_cyl_btn_delete);
         btnMarkRepair = view.findViewById(R.id.mng_cyl_btn_mark_repair);
 
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                confirmDeletion();
-            }
-        });
+        btnDelete.setOnClickListener(v -> confirmDeletion());
 
-        btnMarkRepair.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                confirmMarkRepair();
-            }
-        });
+        btnMarkRepair.setOnClickListener(v -> confirmMarkRepair());
 
         searchBox = view.findViewById(R.id.mng__cyl_search);
-        searchBox.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        searchBox.setOnEditorActionListener((v, actionId, event) -> {
 
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    searchCylinder(searchBox.getText().toString());
-                }
-
-                return false;
-            }
-        });
-        clickSense.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideKeyboard();
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 searchCylinder(searchBox.getText().toString());
             }
+
+            return false;
+        });
+        clickSense.setOnClickListener(v -> {
+            hideKeyboard();
+            searchCylinder(searchBox.getText().toString());
+        });
+        showHistory.setOnClickListener(v -> {
+            launchCylinderHistoryActivity();
         });
 
+    }
+
+    private void launchCylinderHistoryActivity() {
+
+        CylinderHistoryActivity.start(getActivity(),Integer.parseInt(cylinderNo.getText().toString()));
     }
 
     //region Operation initiators --------------------------------

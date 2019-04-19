@@ -1,10 +1,8 @@
-package com.papco.sundar.cylinderinventory.screens.mainscreen;
+package com.papco.sundar.cylinderinventory.screens.cylinders.history;
 
 import android.app.DatePickerDialog;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,24 +11,14 @@ import android.widget.DatePicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.FirebaseApp;
 import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.ConnectivityActivity;
 import com.papco.sundar.cylinderinventory.common.SpacingDecoration;
 import com.papco.sundar.cylinderinventory.data.Batch;
 import com.papco.sundar.cylinderinventory.screens.batchDetail.BatchDetailActivity;
-import com.papco.sundar.cylinderinventory.screens.cylinders.CylindersActivity;
-import com.papco.sundar.cylinderinventory.screens.cylinders.cylinderTypes.CylinderTypeActivity;
-import com.papco.sundar.cylinderinventory.screens.destinations.clients.ClientsActivity;
-import com.papco.sundar.cylinderinventory.screens.destinations.refills.RefillsActivity;
-import com.papco.sundar.cylinderinventory.screens.destinations.repairs.RepairStationsActivity;
-import com.papco.sundar.cylinderinventory.screens.operations.allotment.AllotmentActivity;
-import com.papco.sundar.cylinderinventory.screens.operations.inward.EcrActivity;
-import com.papco.sundar.cylinderinventory.screens.operations.inward.FciActivity;
-import com.papco.sundar.cylinderinventory.screens.operations.inward.RciActivity;
-import com.papco.sundar.cylinderinventory.screens.operations.outward.refill.SelectRefillStationActivity;
-import com.papco.sundar.cylinderinventory.screens.operations.outward.repair.SelectRepairStationActivity;
+import com.papco.sundar.cylinderinventory.screens.mainscreen.BatchFeedScrollListener;
+import com.papco.sundar.cylinderinventory.screens.mainscreen.BatchNumberInputFragment;
+import com.papco.sundar.cylinderinventory.screens.mainscreen.DatePickerDialogFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -38,20 +26,25 @@ import java.util.Calendar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MainActivity extends ConnectivityActivity implements BatchFeedAdapter.FeedAdapterCallBack, DatePickerDialog.OnDateSetListener {
+public class CylinderHistoryActivity extends ConnectivityActivity
+        implements CylHistoryAdapter.Callback, DatePickerDialog.OnDateSetListener {
 
-    public static final String NOTIFICATION_CHANNEL_ID = "transactionChannelID";
-    public static final String NOTIFICATION_CHANNEL_NAME = "Cylinder Inventory";
-    public static final String NOTIFICATION_CHANNEL_DESC = "Notifications about transactions";
+    public static void start(Context context,int cylinderNumber){
+
+        Bundle args=new Bundle();
+        args.putInt("cylinder_number",cylinderNumber);
+        Intent intent=new Intent(context,CylinderHistoryActivity.class);
+        intent.putExtras(args);
+        context.startActivity(intent);
+
+    }
+
 
     public static final int FILTER_NONE = 0;
     public static final int FILTER_INVOICE = 1;
@@ -63,9 +56,8 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
     private final String KEY_SELECTED_FILTER = "selected_filter";
     private final String KEY_TIMELINE_FILTER = "timeline_filter";
 
-    private DrawerLayout drawerLayout;
     private RecyclerView recyclerView;
-    private BatchFeedAdapter adapter;
+    private CylHistoryAdapter adapter;
     private ProgressBar progressBar;
     private ConstraintLayout timelineFilterView;
     private TextView timeline_filter_info;
@@ -73,20 +65,17 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
     private int typeFilter = 0;
     private long timelineFilter = -1;
 
-    private MainActivityVM viewModel;
+    private CylinderHistoryVM viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        viewModel = ViewModelProviders.of(this).get(MainActivityVM.class);
+        viewModel = ViewModelProviders.of(this).get(CylinderHistoryVM.class);
         linkViews();
         restoreFilters(savedInstanceState);
         initViews();
         setupToolBar();
-        setupDrawer();
-        createNotificationChannel();
-        FirebaseApp.initializeApp(getApplicationContext());
 
     }
 
@@ -118,7 +107,7 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
         switch (item.getItemId()) {
 
             case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
+                finish();
                 return true;
 
             case R.id.mnu_feed_filter_all:
@@ -149,10 +138,6 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
                 setTypeFilter(FILTER_RCI);
                 break;
 
-            case R.id.mnu_main_screen_search_batch_number:
-                showSearchByBatchNumberFragment();
-                break;
-
             case R.id.mnu_main_screen_search_by_date:
                 showDatePickerDialog();
                 break;
@@ -174,17 +159,17 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
     private void initViews() {
 
         SpacingDecoration decoration = new SpacingDecoration(this, SpacingDecoration.VERTICAL, 18, 12, 24);
-        adapter = new BatchFeedAdapter(getApplicationContext(), this);
+        adapter = new CylHistoryAdapter(getApplicationContext(), this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         BatchFeedScrollListener scrollListener = new BatchFeedScrollListener(layoutManager);
-        adapter.setDataSource(viewModel.getFeedDataSource());
+        adapter.setDataSource(viewModel.getHistoryDataSource());
         adapter.setScrollListener(scrollListener);
 
         recyclerView.addItemDecoration(decoration);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addOnScrollListener(scrollListener);
         recyclerView.setAdapter(adapter);
-        adapter.setFilters(typeFilter,timelineFilter);
+        adapter.setFilters(typeFilter, timelineFilter,getCylinderNumber());
 
         if (timelineFilter == -1)
             hideTimelineFilterView();
@@ -195,7 +180,7 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
         timelineFilterClose.setOnClickListener(v -> clearTimelineFilter());
     }
 
-    private void restoreFilters(Bundle savedInstanceState){
+    private void restoreFilters(Bundle savedInstanceState) {
 
         if (savedInstanceState == null) {
             typeFilter = FILTER_NONE;
@@ -208,18 +193,18 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
     }
 
 
-    private void setTimeLineFilter(long chosenTime){
+    private void setTimeLineFilter(long chosenTime) {
 
-        timelineFilter=chosenTime;
+        timelineFilter = chosenTime;
         showTimelineFilterView();
-        adapter.setFilters(typeFilter,timelineFilter);
+        adapter.setFilters(typeFilter, timelineFilter,getCylinderNumber());
     }
 
     private void clearTimelineFilter() {
 
         timelineFilter = -1;
         hideTimelineFilterView();
-        adapter.setFilters(typeFilter,-1);
+        adapter.setFilters(typeFilter, -1,getCylinderNumber());
     }
 
     private void hideTimelineFilterView() {
@@ -234,30 +219,22 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
 
     }
 
-    private void showDatePickerDialog(){
+    private void showDatePickerDialog() {
 
-        DatePickerDialogFragment datePicker=new DatePickerDialogFragment();
-        datePicker.show(getSupportFragmentManager(),"datePicker");
-
-    }
-
-    private void showDeleteBatchDialog(Batch item) {
-
-        viewModel.setBatchToDelete(item);
-        DeleteBatchDialog deleteBatchDialog=new DeleteBatchDialog();
-        deleteBatchDialog.show(getSupportFragmentManager(),"deleteDialog");
+        DatePickerDialogFragment datePicker = new DatePickerDialogFragment();
+        datePicker.show(getSupportFragmentManager(), "datePicker");
 
     }
 
-    private void setTypeFilter(int typeFilter){
+    private void setTypeFilter(int typeFilter) {
 
         if (typeFilter == this.typeFilter)
             return;
         else
-            this.typeFilter=typeFilter;
+            this.typeFilter = typeFilter;
 
         setTitle();
-        adapter.setFilters(typeFilter,timelineFilter);
+        adapter.setFilters(typeFilter, timelineFilter,getCylinderNumber());
         invalidateOptionsMenu();
 
     }
@@ -285,104 +262,12 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
         if (actionBar == null)
             return;
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        actionBar.setTitle(getTitleForTypeFilter(typeFilter));
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+        actionBar.setTitle("Cylinder "+Integer.toString(getCylinderNumber())+" history");
 
     }
 
-    private void setupDrawer() {
-
-        drawerLayout = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(menuItem -> {
-
-            boolean result = false;
-
-            switch (menuItem.getItemId()) {
-                case R.id.mnu_drawer_cylinders:
-                    showActivity(CylindersActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_cylinder_types:
-                    showActivity(CylinderTypeActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_clients:
-                    showActivity(ClientsActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_refilling_stations:
-                    showActivity(RefillsActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_repair_stations:
-                    showActivity(RepairStationsActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_fci:
-                    showActivity(FciActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_ecr:
-                    showActivity(EcrActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_repin:
-                    showActivity(RciActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_refill:
-                    showActivity(SelectRefillStationActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_repout:
-                    showActivity(SelectRepairStationActivity.class);
-                    result = true;
-                    break;
-
-                case R.id.mnu_drawer_allotment:
-                    showActivity(AllotmentActivity.class);
-                    result = true;
-                    break;
-            }
-            drawerLayout.closeDrawer(GravityCompat.START);
-            return result;
-        });
-
-    }
-
-    private void showActivity(Class<?> className) {
-
-        Intent intent = new Intent(this, className);
-        startActivity(intent);
-
-    }
-
-    private void createNotificationChannel() {
-
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_LOW;
-            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, importance);
-            channel.setDescription(NOTIFICATION_CHANNEL_DESC);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
-    private void setTitle(){
+    private void setTitle() {
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
@@ -390,33 +275,35 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
 
     }
 
-    private String getTitleForTypeFilter(int typeFilter){
+    private String getTitleForTypeFilter(int typeFilter) {
+
+        String result="Cylinder "+Integer.toString(getCylinderNumber())+": ";
 
         switch (typeFilter) {
 
             case FILTER_NONE:
-                return  "Live Summary";
+                return "Cylinder "+Integer.toString(getCylinderNumber())+" history";
 
             case FILTER_INVOICE:
-                return "Invoice summary";
+                return result+"Invoices";
 
             case FILTER_ECR:
-                return  "Ecr summary";
+                return result+"Ecr";
 
             case FILTER_REFILL:
-                return  "Refill summary";
+                return result+"Refills";
 
             case FILTER_FCI:
-                return  "Fci summary";
+                return result+"Fci";
 
             case FILTER_REPAIR:
-                return  "Repair summary";
+                return result+"Repairs";
 
             case FILTER_RCI:
-                return  "Rci summary";
+                return result+"Rci";
         }
 
-        return "Live Feed";
+        return "Cylinder "+Integer.toString(getCylinderNumber())+" history";
 
     }
 
@@ -440,24 +327,8 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
     @Override
     public void onRecyclerItemLongClicked(Batch item, int position, View view) {
 
-        PopupMenu popupMenu=new PopupMenu(this,view);
-        popupMenu.getMenuInflater().inflate(R.menu.mnu_delete,popupMenu.getMenu());
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-
-                if(menuItem.getItemId()==R.id.mnu_delete){
-                    showDeleteBatchDialog(item);
-                    return true;
-                }
-
-                return false;
-            }
-        });
-        popupMenu.show();
 
     }
-
 
 
     @Override
@@ -476,16 +347,26 @@ public class MainActivity extends ConnectivityActivity implements BatchFeedAdapt
         //setting the calendar to the last millisecond of the selected date so that the query
         //can be constructed from it
 
-        Calendar calendar=Calendar.getInstance();
-        calendar.set(Calendar.YEAR,year);
-        calendar.set(Calendar.MONTH,month);
-        calendar.set(Calendar.DAY_OF_MONTH,dayOfMonth);
-        calendar.set(Calendar.HOUR_OF_DAY,23);
-        calendar.set(Calendar.MINUTE,59);
-        calendar.set(Calendar.SECOND,59);
-        calendar.set(Calendar.MILLISECOND,999);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month);
+        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
 
         setTimeLineFilter(calendar.getTimeInMillis());
 
     }
+
+    private int getCylinderNumber(){
+
+        Bundle args=getIntent().getExtras();
+        if(args==null)
+            return -1;
+
+        return args.getInt("cylinder_number",-1);
+    }
+
 }

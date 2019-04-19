@@ -113,6 +113,14 @@ public class AggregationOperation {
 
     }
 
+    public void reverseOperation(){
+
+        DocumentReference tempRef;
+        tempRef=sourceReference;
+        sourceReference=destinationReference;
+        destinationReference=tempRef;
+        approvalReference=null;
+    }
 
     //************** initializing methods ********************************
 

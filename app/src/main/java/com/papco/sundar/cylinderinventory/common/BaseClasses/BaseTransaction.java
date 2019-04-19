@@ -105,6 +105,35 @@ public abstract class BaseTransaction implements Transaction.Function<Void> {
         destination.setEditable(false);
     }
 
+    protected void initializeReverseDestination(Transaction transaction, int destId)
+            throws FirebaseFirestoreException {
+
+        if(destId==Destination.TYPE_WAREHOUSE){
+            destination=new Destination();
+            destination.setDestType(Destination.TYPE_WAREHOUSE);
+            destination.setId(destId);
+            return;
+        }
+
+        DocumentReference destRef = db.collection(DbPaths.COLLECTION_DESTINATIONS).document(Integer.toString(destId));
+        DocumentSnapshot destDocument = transaction.get(destRef);
+
+        if (!destDocument.exists())
+            throw new FirebaseFirestoreException("Invalid destination", FirebaseFirestoreException.Code.CANCELLED);
+
+        destination = destDocument.toObject(Destination.class);
+
+        if(destination==null)
+            throw new FirebaseFirestoreException("Invalid destination", FirebaseFirestoreException.Code.CANCELLED);
+
+        if(batchType== Batch.TYPE_INVOICE || batchType==Batch.TYPE_REFILL|| batchType==Batch.TYPE_REPAIR)
+            destination.setCylinderCount(destination.getCylinderCount()- getPrefetchDocuments().size());
+        else
+            destination.setCylinderCount(destination.getCylinderCount()+ getPrefetchDocuments().size());
+
+        destination.setEditable(false);
+    }
+
     protected void writeDestination(Transaction transaction)
             throws FirebaseFirestoreException {
 
@@ -178,6 +207,28 @@ public abstract class BaseTransaction implements Transaction.Function<Void> {
         }
         globalAggregation = new AggregationOperation(CylinderType.TYPE_GLOBAL, batchType, getPrefetchDocuments().size());
 
+
+        globalAggregation.initializeWith(transaction);
+        for (AggregationOperation operation : aggregationOperations)
+            operation.initializeWith(transaction);
+    }
+
+    protected void initializeReverseAggregations(Transaction transaction)
+            throws FirebaseFirestoreException {
+
+        if (masterList == null)
+            throw new FirebaseFirestoreException("Cannot write cylinders without initializing",
+                    FirebaseFirestoreException.Code.CANCELLED);
+
+        aggregationOperations = new ArrayList<>();
+        AggregationOperation newOperation;
+        for (List<Cylinder> monoList : masterList) {
+            newOperation=new AggregationOperation(monoList.get(0).getCylinderTypeName(), batchType, monoList.size());
+            newOperation.reverseOperation();
+            aggregationOperations.add(newOperation);
+        }
+        globalAggregation = new AggregationOperation(CylinderType.TYPE_GLOBAL, batchType, getPrefetchDocuments().size());
+        globalAggregation.reverseOperation();
 
         globalAggregation.initializeWith(transaction);
         for (AggregationOperation operation : aggregationOperations)

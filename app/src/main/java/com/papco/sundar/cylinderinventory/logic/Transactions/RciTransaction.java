@@ -72,6 +72,7 @@ public class RciTransaction extends BaseTransaction {
             throw new FirebaseFirestoreException("Cylinders from multiple locations found. Please check",
                     FirebaseFirestoreException.Code.CANCELLED);
 
+        cylinder.takeSnapShot();
         cylinder.setLocationId(Destination.TYPE_WAREHOUSE);
         cylinder.setLocationName("WAREHOUSE");
         cylinder.setLastTransaction(getTimestamp());

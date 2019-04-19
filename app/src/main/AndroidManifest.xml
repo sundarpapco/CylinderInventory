@@ -51,6 +51,7 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".screens.operations.allotment.approve.ApproveAllotmentActivity"/>
         <activity android:name=".screens.operations.outward.Invoice.InvoiceActivity"/>
+        <activity android:name=".screens.cylinders.history.CylinderHistoryActivity"/>
 
         <service android:name=".logic.TransactionRunnerService"
             android:exported="false"/>

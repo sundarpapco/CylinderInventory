@@ -16,6 +16,7 @@ public class MainActivityVM extends AndroidViewModel {
 
     private MutableLiveData<Batch> searchedBatch;
     private FeedDataSource feedDataSource;
+    private Batch batchToDelete;
 
     public MainActivityVM(@NonNull Application application) {
         super(application);
@@ -23,13 +24,21 @@ public class MainActivityVM extends AndroidViewModel {
 
     }
 
-    public FeedDataSource getFeedDataSource() {
+    FeedDataSource getFeedDataSource() {
 
         if(feedDataSource==null)
             feedDataSource=new FeedDataSource(getApplication());
 
         return feedDataSource;
 
+    }
+
+    Batch getBatchToDelete() {
+        return batchToDelete;
+    }
+
+    void setBatchToDelete(Batch batchToDelete) {
+        this.batchToDelete = batchToDelete;
     }
 
     MutableLiveData<Batch> getSearchedBatch() {
@@ -66,5 +75,6 @@ public class MainActivityVM extends AndroidViewModel {
         super.onCleared();
        if(feedDataSource!=null)
            feedDataSource.onDestroy();
+       feedDataSource=null;
     }
 }

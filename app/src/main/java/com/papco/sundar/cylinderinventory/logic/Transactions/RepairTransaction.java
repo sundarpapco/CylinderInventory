@@ -75,6 +75,7 @@ public class RepairTransaction extends BaseTransaction {
             throw new FirebaseFirestoreException("Non damaged cylinders found. Please check",
                     FirebaseFirestoreException.Code.CANCELLED);
 
+        cylinder.takeSnapShot();
         cylinder.setLocationId(getDestination().getId());
         cylinder.setLocationName(getDestination().getName());
         cylinder.setLastTransaction(getTimestamp());

@@ -75,6 +75,7 @@ public class EcrTransaction extends BaseTransaction {
             throw new FirebaseFirestoreException("Error: Cylinders from multiple locations found",
                     FirebaseFirestoreException.Code.CANCELLED);
 
+        cylinder.takeSnapShot();
         cylinder.setLocationId(Destination.TYPE_WAREHOUSE);
         cylinder.setLocationName("WAREHOUSE");
         cylinder.setLastTransaction(getTimestamp());

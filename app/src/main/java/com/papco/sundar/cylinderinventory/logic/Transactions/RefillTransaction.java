@@ -82,6 +82,7 @@ public class RefillTransaction extends BaseTransaction {
             throw new FirebaseFirestoreException("Damaged cylinders found. Please check",
                     FirebaseFirestoreException.Code.CANCELLED);
 
+        cylinder.takeSnapShot();
         cylinder.setLocationId(getDestination().getId());
         cylinder.setLocationName(getDestination().getName());
         cylinder.setLastTransaction(getTimestamp());
