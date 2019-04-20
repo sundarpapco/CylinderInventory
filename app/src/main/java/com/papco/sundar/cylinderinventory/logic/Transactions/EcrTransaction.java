@@ -75,6 +75,11 @@ public class EcrTransaction extends BaseTransaction {
             throw new FirebaseFirestoreException("Error: Cylinders from multiple locations found",
                     FirebaseFirestoreException.Code.CANCELLED);
 
+        if (cylinder.isAlloted())
+            throw new FirebaseFirestoreException(
+                    "Cylinder number "+cylinder.getStringId()+" has been allotted to a client. Please delete the allotment first",
+                    FirebaseFirestoreException.Code.CANCELLED);
+
         cylinder.takeSnapShot();
         cylinder.setLocationId(Destination.TYPE_WAREHOUSE);
         cylinder.setLocationName("WAREHOUSE");

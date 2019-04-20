@@ -70,16 +70,23 @@ public class RefillTransaction extends BaseTransaction {
     @Override
     protected void onCylinderValidation(Cylinder cylinder) throws FirebaseFirestoreException {
 
+        String cylinderDetail="Cylinder number "+cylinder.getStringId()+" ";
+
         if(cylinder.getLocationId()!= Destination.TYPE_WAREHOUSE)
-            throw new FirebaseFirestoreException("Some cylinders not in warehouse. Please check",
+            throw new FirebaseFirestoreException(cylinderDetail+"not in warehouse. Please check",
                     FirebaseFirestoreException.Code.CANCELLED);
 
         if(!cylinder.isEmpty())
-            throw new FirebaseFirestoreException("Non empty cylinders found. Please check",
+            throw new FirebaseFirestoreException(cylinderDetail+"is not empty. Please check",
                     FirebaseFirestoreException.Code.CANCELLED);
 
         if(cylinder.isDamaged())
-            throw new FirebaseFirestoreException("Damaged cylinders found. Please check",
+            throw new FirebaseFirestoreException(cylinderDetail+"is damaged. Please check",
+                    FirebaseFirestoreException.Code.CANCELLED);
+
+        if (cylinder.isAlloted())
+            throw new FirebaseFirestoreException(
+                    cylinderDetail+" has been allotted to a client. Please delete the allotment first",
                     FirebaseFirestoreException.Code.CANCELLED);
 
         cylinder.takeSnapShot();

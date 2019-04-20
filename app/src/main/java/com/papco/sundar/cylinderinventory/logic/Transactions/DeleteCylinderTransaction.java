@@ -60,6 +60,10 @@ public class DeleteCylinderTransaction extends BaseTransaction {
         if(cylinder.getLocationId()!= Destination.TYPE_WAREHOUSE)
             throw new FirebaseFirestoreException("Cylinder not in warehouse. Try after getting it to warehouse",FirebaseFirestoreException.Code.CANCELLED);
 
+        if (cylinder.isAlloted())
+            throw new FirebaseFirestoreException("This cylinder has been allotted to a client. Please delete the allotment first",
+                    FirebaseFirestoreException.Code.CANCELLED);
+
         if(cylinder.isDamaged()) {
             aggRef = db.document(DbPaths.COUNT_CYLINDERS_DAMAGED);
             typeCounterToReduceRef=db.document(DbPaths.getAggregationForType(cylinder.getCylinderTypeName(), DbPaths.AggregationType.DAMAGED));

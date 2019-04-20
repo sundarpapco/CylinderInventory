@@ -173,8 +173,8 @@ public class AllotmentActivity extends ConnectivityActivity implements RecyclerL
 
     private void deleteAllotment(Allotment allotment){
 
+        viewModel.setAllotmentToDelete(allotment);
         DeleteAllotmentFragment deleteFragment=new DeleteAllotmentFragment();
-        deleteFragment.setArguments(DeleteAllotmentFragment.getStartingArgs(allotment.getId()));
         deleteFragment.show(getSupportFragmentManager(),"deleteFragment");
 
     }

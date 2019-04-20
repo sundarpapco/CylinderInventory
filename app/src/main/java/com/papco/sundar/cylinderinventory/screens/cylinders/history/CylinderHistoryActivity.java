@@ -17,11 +17,11 @@ import com.papco.sundar.cylinderinventory.common.SpacingDecoration;
 import com.papco.sundar.cylinderinventory.data.Batch;
 import com.papco.sundar.cylinderinventory.screens.batchDetail.BatchDetailActivity;
 import com.papco.sundar.cylinderinventory.screens.mainscreen.BatchFeedScrollListener;
-import com.papco.sundar.cylinderinventory.screens.mainscreen.BatchNumberInputFragment;
 import com.papco.sundar.cylinderinventory.screens.mainscreen.DatePickerDialogFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -90,7 +90,7 @@ public class CylinderHistoryActivity extends ConnectivityActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        getMenuInflater().inflate(R.menu.mnu_main_screen, menu);
+        getMenuInflater().inflate(R.menu.mnu_cyl_history, menu);
         menu.getItem(1).getSubMenu().getItem(typeFilter).setChecked(true);
         return true;
     }
@@ -213,7 +213,7 @@ public class CylinderHistoryActivity extends ConnectivityActivity
 
     private void showTimelineFilterView() {
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
         timelineFilterView.setVisibility(View.VISIBLE);
         timeline_filter_info.setText("Results starting from " + dateFormat.format(timelineFilter));
 
@@ -304,15 +304,6 @@ public class CylinderHistoryActivity extends ConnectivityActivity
         }
 
         return "Cylinder "+Integer.toString(getCylinderNumber())+" history";
-
-    }
-
-    private void showSearchByBatchNumberFragment() {
-
-        BatchNumberInputFragment batchNumberInputFragment = new BatchNumberInputFragment();
-        batchNumberInputFragment.setArguments(
-                BatchNumberInputFragment.getArguments("Batch number", "", "SEARCH"));
-        batchNumberInputFragment.show(getSupportFragmentManager(), "batchNumberSearchFragment");
 
     }
 

@@ -54,6 +54,7 @@ public class PickupAllotmentTransaction extends BaseTransaction {
 
         // ************ write and prepare the allotment for ready to invoice
         allotment.setState(Allotment.STATE_READY_FOR_INVOICE);
+        writeCylinders(transaction);
         transaction.set(allotmentRef,allotment);
         return null;
     }
@@ -113,6 +114,11 @@ public class PickupAllotmentTransaction extends BaseTransaction {
             throw new FirebaseFirestoreException(cylinderNo+"is empty",
                     FirebaseFirestoreException.Code.CANCELLED);
 
+        if(cylinder.isAlloted())
+            throw new FirebaseFirestoreException(cylinderNo+"is already allotted to another client",
+                    FirebaseFirestoreException.Code.CANCELLED);
+
+        cylinder.setAlloted(true);
 
     }
 }

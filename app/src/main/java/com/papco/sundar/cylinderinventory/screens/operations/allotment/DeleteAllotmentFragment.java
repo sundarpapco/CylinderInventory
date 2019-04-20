@@ -13,23 +13,17 @@ import com.papco.sundar.cylinderinventory.R;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.TransactionDialogFragment;
 import com.papco.sundar.cylinderinventory.common.Msg;
+import com.papco.sundar.cylinderinventory.data.Allotment;
 import com.papco.sundar.cylinderinventory.logic.TransactionRunnerService;
 import com.papco.sundar.cylinderinventory.logic.Transactions.DeleteAllotmentTransaction;
 
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProviders;
 
 public class DeleteAllotmentFragment extends TransactionDialogFragment {
-
-    private static final String KEY_ALLOTMENT_ID="allotment_id";
-
-    public static Bundle getStartingArgs(int allotmentId){
-
-        Bundle args=new Bundle();
-        args.putInt(KEY_ALLOTMENT_ID,allotmentId);
-        return args;
-
-    }
 
     private Button btnDelete;
     private ProgressBar progressBar;
@@ -37,6 +31,17 @@ public class DeleteAllotmentFragment extends TransactionDialogFragment {
     private final String successMsg="Allotment deleted successfully";
     private final String progressMsg="Deleting allotment";
     private final String failureMsg="Delete allotment failed. Please check internet connection";
+    private AllotmentActivityVM viewModel;
+    private Allotment allotmentToDelete;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        viewModel= ViewModelProviders.of(getActivity()).get(AllotmentActivityVM.class);
+        allotmentToDelete=viewModel.getAllotmentToDelete();
+
+    }
 
     @NonNull
     @Override
@@ -82,15 +87,6 @@ public class DeleteAllotmentFragment extends TransactionDialogFragment {
 
     }
 
-    private int getAllotmentId(){
-
-        Bundle args=getArguments();
-        if(args==null)
-            return -1;
-
-        return args.getInt(KEY_ALLOTMENT_ID,-1);
-    }
-
     @Override
     public void showTransactionProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
@@ -102,8 +98,13 @@ public class DeleteAllotmentFragment extends TransactionDialogFragment {
     }
 
     @Override
+    public List<Integer> getPrefetchList() {
+        return allotmentToDelete.getCylinders();
+    }
+
+    @Override
     public BaseTransaction getTransactionToRun(int requestCode) {
-        return new DeleteAllotmentTransaction(getAllotmentId());
+        return new DeleteAllotmentTransaction(allotmentToDelete.getId());
     }
 
     @Override

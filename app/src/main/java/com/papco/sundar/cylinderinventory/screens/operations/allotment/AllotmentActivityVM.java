@@ -25,6 +25,7 @@ public class AllotmentActivityVM extends AndroidViewModel {
 
     private MutableLiveData<List<Allotment>> allotmentList;
     private ListenerRegistration listenerRegistration;
+    private Allotment allotmentToDelete;
 
     public AllotmentActivityVM(@NonNull Application application) {
         super(application);
@@ -34,6 +35,14 @@ public class AllotmentActivityVM extends AndroidViewModel {
 
     public MutableLiveData<List<Allotment>> getAllotmentList() {
         return allotmentList;
+    }
+
+    public Allotment getAllotmentToDelete() {
+        return allotmentToDelete;
+    }
+
+    public void setAllotmentToDelete(Allotment allotmentToDelete) {
+        this.allotmentToDelete = allotmentToDelete;
     }
 
     private void loadAllotments() {

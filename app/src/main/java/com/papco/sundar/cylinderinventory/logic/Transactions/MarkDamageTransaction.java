@@ -54,6 +54,9 @@ public class MarkDamageTransaction extends BaseTransaction {
         if (cylinder.getLocationId() != Destination.TYPE_WAREHOUSE)
             throw new FirebaseFirestoreException("Cylinder not in warehouse. Try after getting it to warehouse", FirebaseFirestoreException.Code.CANCELLED);
 
+        if (cylinder.isAlloted())
+            throw new FirebaseFirestoreException("This cylinder has been allotted to a client. Please delete the allotment first",
+                    FirebaseFirestoreException.Code.CANCELLED);
 
         typeDamageCounterRef = db.document(DbPaths.getAggregationForType(cylinder.getCylinderTypeName(), DbPaths.AggregationType.DAMAGED));
         if (cylinder.isEmpty()) {
@@ -114,8 +117,8 @@ public class MarkDamageTransaction extends BaseTransaction {
         transaction.set(cylinderRef, cylinder);
         transaction.set(globalCounterToReduce, warehouseAgg);
         transaction.set(globalDamageCounterRef, damageAgg);
-        transaction.set(typeDamageCounterRef,typeDamagedCounter);
-        transaction.set(typeCounterToReduceRef,typeCounterToReduce);
+        transaction.set(typeDamageCounterRef, typeDamagedCounter);
+        transaction.set(typeCounterToReduceRef, typeCounterToReduce);
 
         return null;
     }

@@ -70,6 +70,11 @@ public class FciTransaction extends BaseTransaction {
             throw new FirebaseFirestoreException("Cylinders from multiple locations found. Please check",
                     FirebaseFirestoreException.Code.CANCELLED);
 
+        if (cylinder.isAlloted())
+            throw new FirebaseFirestoreException(
+                    "Cylinder number "+cylinder.getStringId()+" has been allotted to a client. Please delete the allotment first",
+                    FirebaseFirestoreException.Code.CANCELLED);
+
         cylinder.takeSnapShot();
         cylinder.setRefillCount(cylinder.getRefillCount()+1);
         cylinder.setLocationId(Destination.TYPE_WAREHOUSE);

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/mnu_main_screen_search_by_date"
+        android:title="By date"
+        android:icon="@drawable/ic_calendar"
+        app:showAsAction="always"/>
+
+
+    <item android:id="@+id/mnu_filter_list"
+        android:title="Filter list"
+        android:icon="@drawable/ic_filter"
+        app:showAsAction="always">
+
+        <menu>
+
+            <group android:checkableBehavior="single">
+
+                <item android:id="@+id/mnu_feed_filter_all"
+                    android:title="All"/>
+
+                <item android:id="@+id/mnu_feed_filter_invoice"
+                    android:title="Invoice"/>
+
+                <item android:id="@+id/mnu_feed_filter_Ecr"
+                    android:title="Ecr"/>
+
+                <item android:id="@+id/mnu_feed_filter_refill"
+                    android:title="Refills"/>
+
+                <item android:id="@+id/mnu_feed_filter_fci"
+                    android:title="Full cylinder inward"/>
+
+                <item android:id="@+id/mnu_feed_filter_repair"
+                    android:title="Repairs"/>
+
+                <item android:id="@+id/mnu_feed_filter_rci"
+                    android:title="Repaired cylinder inward"/>
+
+            </group>
+
+        </menu>
+
+    </item>
+
+</menu>

@@ -67,15 +67,22 @@ public class InvoiceTransaction extends BaseTransaction {
     @Override
     protected void onCylinderValidation(Cylinder cylinder) throws FirebaseFirestoreException {
 
+        String cylinderDetail="Cylinder number "+cylinder.getStringId()+" ";
+
         if(cylinder.getLocationId()!= Destination.TYPE_WAREHOUSE)
-            throw new FirebaseFirestoreException("Some cylinders not in warehouse. Please check",
+            throw new FirebaseFirestoreException(cylinderDetail+" not in warehouse. Please check",
                     FirebaseFirestoreException.Code.CANCELLED);
 
         if(cylinder.isEmpty())
-            throw new FirebaseFirestoreException("Empty cylinders found. Please check",
+            throw new FirebaseFirestoreException(cylinderDetail+"is empty. Please check",
+                    FirebaseFirestoreException.Code.CANCELLED);
+
+        if(!cylinder.isAlloted())
+            throw new FirebaseFirestoreException(cylinderDetail+"is not allotted to this client. Please check",
                     FirebaseFirestoreException.Code.CANCELLED);
 
         cylinder.takeSnapShot();
+        cylinder.setAlloted(false);
         cylinder.setLocationId(getDestination().getId());
         cylinder.setLocationName(getDestination().getName());
         cylinder.setLastTransaction(getTimestamp());

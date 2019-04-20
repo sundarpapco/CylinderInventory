@@ -8,6 +8,7 @@ import com.google.firebase.firestore.Transaction;
 import com.papco.sundar.cylinderinventory.common.BaseClasses.BaseTransaction;
 import com.papco.sundar.cylinderinventory.common.constants.DbPaths;
 import com.papco.sundar.cylinderinventory.data.Allotment;
+import com.papco.sundar.cylinderinventory.data.Cylinder;
 import com.papco.sundar.cylinderinventory.helpers.ApprovalOperation;
 
 import java.util.ArrayList;
@@ -43,11 +44,21 @@ public class DeleteAllotmentTransaction extends BaseTransaction {
             throw new FirebaseFirestoreException("Allotment not found or already deleted",
                     FirebaseFirestoreException.Code.CANCELLED);
 
+        if(allotment.getState()==Allotment.STATE_READY_FOR_INVOICE) {
+            checkPrefetch();
+            initializeCylinders();
+        }
+
+
         if(allotment.getState()!=Allotment.STATE_ALLOTTED){
+
             approvals=initializeApproval(transaction);
             for(ApprovalOperation approval:approvals)
                 approval.deleteApprovalWith(transaction);
         }
+
+        if(allotment.getState()==Allotment.STATE_READY_FOR_INVOICE)
+            writeCylinders(transaction);
 
 
         transaction.delete(allotmentRef);
@@ -60,12 +71,17 @@ public class DeleteAllotmentTransaction extends BaseTransaction {
         HashMap<String,Integer> map=allotment.getRequirement();
         List<ApprovalOperation> approvals=new ArrayList<>();
         for(String key:map.keySet()){
-            ApprovalOperation approval=new ApprovalOperation(key,(int)map.get(key));
+            ApprovalOperation approval=new ApprovalOperation(key,map.get(key));
             approval.initializeWith(transaction);
             approvals.add(approval);
         }
 
         return approvals;
 
+    }
+
+    @Override
+    protected void onCylinderValidation(Cylinder cylinder) throws FirebaseFirestoreException {
+        cylinder.setAlloted(false);
     }
 }

@@ -16,6 +16,7 @@ public class Cylinder {
     private long lastTransaction;
     private boolean isEmpty;
     private boolean isDamaged;
+    private boolean isAlloted;
     private String remarks;
     private int damageCount;
     private String cylinderTypeName;
@@ -39,6 +40,7 @@ public class Cylinder {
         lastTransaction=0;
         isDamaged=false;
         isEmpty=false;
+        isAlloted=false;
         remarks="";
         locationName="WAREHOUSE";
         damageCount=0;
@@ -147,6 +149,14 @@ public class Cylinder {
 
     public void setCylinderTypeName(String cylinderTypeName) {
         this.cylinderTypeName = cylinderTypeName;
+    }
+
+    public boolean isAlloted() {
+        return isAlloted;
+    }
+
+    public void setAlloted(boolean alloted) {
+        isAlloted = alloted;
     }
 
     public int getSnapRefillCount() {
